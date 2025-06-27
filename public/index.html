@@ -1,26 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>KAISSAVA Arena</title>
+  <meta charset="UTF-8" />
+  <title>KAISSAVA Profil</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #ffd700;
-      text-align: center;
-      padding: 20px;
-    }
-    button {
-      font-size: 18px;
-      padding: 10px 20px;
-      margin-top: 20px;
-      cursor: pointer;
-    }
+    body { font-family: monospace; background-color: #121212; color: #ffcc00; padding: 20px; }
+    h1 { font-size: 2rem; }
+    pre { background: #222; padding: 15px; border-radius: 10px; }
   </style>
 </head>
 <body>
-  <h1>KAISSAVA Arena'ya Hoşgeldin!</h1>
-  <p>Oyunu Telegram bot üzerinden oynayabilirsin.</p>
-  <button onclick="alert('Oyun arayüzü yakında!')">Yakında oyun arayüzü gelecek</button>
+  <h1>KAISSAVA Profil</h1>
+  <label for="userId">Kullanıcı ID:</label>
+  <input id="userId" type="text" placeholder="Telegram ID giriniz" />
+  <button onclick="loadProfile()">Profili Göster</button>
+
+  <pre id="profileOutput"></pre>
+
+  <script>
+    async function loadProfile() {
+      const userId = document.getElementById("userId").value.trim();
+      if (!userId) {
+        alert("Lütfen kullanıcı ID giriniz.");
+        return;
+      }
+
+      const response = await fetch(`/api/user/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        document.getElementById("profileOutput").textContent = JSON.stringify(data, null, 2);
+      } else {
+        document.getElementById("profileOutput").textContent = "Kullanıcı bulunamadı.";
+      }
+    }
+  </script>
 </body>
 </html>
