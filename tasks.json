@@ -1,0 +1,10 @@
+{
+  "task1": {
+    "description": "Günlük giriş yap",
+    "reward": 10
+  },
+  "task2": {
+    "description": "Bir maç kazan",
+    "reward": 20
+  }
+}
