@@ -2,36 +2,82 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>KAISSAVA Profil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KAISSAVA Ana Sayfa</title>
   <style>
-    body { font-family: monospace; background-color: #121212; color: #ffcc00; padding: 20px; }
-    h1 { font-size: 2rem; }
-    pre { background: #222; padding: 15px; border-radius: 10px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+      color: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 8px #2563eb;
+    }
+    .menu-buttons {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 600px;
+    }
+    button {
+      background: #2563eb;
+      border: none;
+      color: white;
+      padding: 1rem 2rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
+      transition: background 0.3s ease, transform 0.2s ease;
+      min-width: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    button:hover {
+      background: #1e40af;
+      transform: scale(1.05);
+      box-shadow: 0 6px 14px rgba(30, 64, 175, 0.8);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    button svg {
+      width: 24px;
+      height: 24px;
+    }
   </style>
 </head>
 <body>
-  <h1>KAISSAVA Profil</h1>
-  <label for="userId">Kullanıcı ID:</label>
-  <input id="userId" type="text" placeholder="Telegram ID giriniz" />
-  <button onclick="loadProfile()">Profili Göster</button>
+  <h1>KAISSAVA</h1>
 
-  <pre id="profileOutput"></pre>
+  <div class="menu-buttons">
+    <button onclick="goTo('pvp')" aria-label="PvP">⚔️ PvP</button>
+    <button onclick="goTo('arena')" aria-label="Arena">🏟️ Arena</button>
+    <button onclick="goTo('league')" aria-label="Lig">🏆 Lig</button>
+    <button onclick="goTo('profile')" aria-label="Profil">👤 Profil</button>
+  </div>
 
   <script>
-    async function loadProfile() {
-      const userId = document.getElementById("userId").value.trim();
+    function goTo(page) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('user_id');
       if (!userId) {
-        alert("Lütfen kullanıcı ID giriniz.");
+        alert('Kullanıcı ID bulunamadı!');
         return;
       }
-
-      const response = await fetch(`/api/user/${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        document.getElementById("profileOutput").textContent = JSON.stringify(data, null, 2);
-      } else {
-        document.getElementById("profileOutput").textContent = "Kullanıcı bulunamadı.";
-      }
+      window.location.href = `/${page}.html?user_id=${userId}`;
     }
   </script>
 </body>
