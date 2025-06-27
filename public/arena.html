@@ -12,12 +12,48 @@
       padding: 2rem;
       max-width: 600px;
       margin: auto;
+      position: relative;
       text-align: center;
+    }
+    h1 {
+      text-shadow: 0 0 8px #2563eb;
+    }
+    /* Geri butonu */
+    .back-button {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.7);
+      transition: background 0.3s ease;
+      z-index: 1000;
+    }
+    .back-button:hover {
+      background: #1e40af;
     }
   </style>
 </head>
 <body>
-  <h1>Arena</h1>
-  <p>Buraya arenayla ilgili özellikler gelecek.</p>
+  <button class="back-button" onclick="goBack()">← Geri</button>
+  <h1>Sayfa Başlığı</h1>
+  <p>Buraya içerik gelecek.</p>
+
+  <script>
+    function goBack() {
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get('user_id');
+      if(userId) {
+        window.location.href = `/index.html?user_id=${userId}`;
+      } else {
+        window.location.href = '/index.html';
+      }
+    }
+  </script>
 </body>
 </html>
