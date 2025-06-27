@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KAISSAVA - PvP</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+      color: #f9fafb;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+    button {
+      background: #2563eb;
+      border: none;
+      color: white;
+      padding: 1rem 2rem;
+      font-size: 1.25rem;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
+      transition: background 0.3s ease, transform 0.2s ease;
+      margin-top: 2rem;
+    }
+    button:hover {
+      background: #1e40af;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>PvP Arenası</h1>
+  <p>Rakiple savaşmaya hazır mısın?</p>
+  <button id="fightBtn">Savaşı Başlat</button>
+
+  <div id="result" style="margin-top:20px;"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+    const fightBtn = document.getElementById('fightBtn');
+    const resultDiv = document.getElementById('result');
+
+    fightBtn.addEventListener('click', () => {
+      if (!userId) {
+        alert('Kullanıcı ID bulunamadı!');
+        return;
+      }
+      fightBtn.disabled = true;
+      fightBtn.textContent = 'Savaşılıyor...';
+
+      fetch(`/api/pvp/${userId}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if(data.error) {
+            resultDiv.textContent = 'Hata: ' + data.error;
+          } else {
+            let msg = `Savaş tamamlandı! XP: ${data.xp}, Coin: ${data.coins}, Yeni Seviye: ${data.level}, Lig: ${data.league}`;
+            if(data.leveledUp) msg += " 🎉 Seviye atladınız!";
+            msg += `\nYeni Eşya: ${data.item}`;
+            resultDiv.textContent = msg;
+          }
+          fightBtn.disabled = false;
+          fightBtn.textContent = 'Savaşı Başlat';
+        })
+        .catch(() => {
+          resultDiv.textContent = 'Savaş sırasında hata oluştu.';
+          fightBtn.disabled = false;
+          fightBtn.textContent = 'Savaşı Başlat';
+        });
+    });
+  </script>
+</body>
+</html>
