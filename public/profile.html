@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KAISSAVA - Profil</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+      color: #f9fafb;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      text-shadow: 0 0 8px #2563eb;
+    }
+    .profile-info {
+      background: rgba(37, 99, 235, 0.2);
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      margin-top: 2rem;
+    }
+    p {
+      font-size: 1.2rem;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Profil</h1>
+
+  <div class="profile-info">
+    <p><strong>Kullanıcı ID:</strong> <span id="userId">Yükleniyor...</span></p>
+    <p><strong>İsim:</strong> <span id="userName">Yükleniyor...</span></p>
+    <p><strong>Seviye:</strong> <span id="level">Yükleniyor...</span></p>
+    <p><strong>XP:</strong> <span id="xp">Yükleniyor...</span></p>
+    <p><strong>Coin:</strong> <span id="coins">Yükleniyor...</span></p>
+    <p><strong>Sınıf:</strong> <span id="class">Yükleniyor...</span></p>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id');
+    document.getElementById('userId').textContent = userId || "Bilinmiyor";
+
+    if(userId) {
+      fetch(`/api/user/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          if(data.error) {
+            alert(data.error);
+            return;
+          }
+          document.getElementById('userName').textContent = data.name;
+          document.getElementById('level').textContent = data.level;
+          document.getElementById('xp').textContent = data.xp;
+          document.getElementById('coins').textContent = data.coins;
+          document.getElementById('class').textContent = data.class;
+        })
+        .catch(() => alert('Kullanıcı bilgileri alınamadı.'));
+    }
+  </script>
+</body>
+</html>
