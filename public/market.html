@@ -1,1 +1,44 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Market</title>
+  <style>
+    body { background: #23272f; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 450px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 32px;}
+    .item-list { margin-bottom: 26px;}
+    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .item-name { font-size: 1.1em; }
+    .buy-btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 8px 24px; font-size: 1em; cursor: pointer; transition: .18s;}
+    .buy-btn:hover { background: #1e40af;}
+    .result { margin-top: 22px; color: #90ee90; min-height: 26px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Market</h1>
+    <div class="item-list" id="marketList"></div>
+    <div class="result" id="marketResult"></div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+  </div>
+  <script>
+    let userId = "sozer"; // Test için sabit, sonra login ile dinamik yapılacak
+
+    function loadMarket() {
+      fetch('/api/market')
+        .then(res => res.json())
+        .then(items => {
+          let html = '';
+          items.forEach(item => {
+            html += `<div class="item">
+              <span class="item-name">${item.name} - ${item.price} coin</span>
+              <button class="buy-btn" onclick="buyItem('${item.id}')">Satın Al</button>
+            </div>`;
+          });
+          document.getElementById('marketList').innerHTML = html;
+        });
+    }
 
