@@ -1,1 +1,6 @@
+[
+  { "id": "sword", "name": "Demir Kılıç", "price": 50 },
+  { "id": "armor", "name": "Çelik Zırh", "price": 80 },
+  { "id": "potion", "name": "İksir", "price": 25 }
+]
 
