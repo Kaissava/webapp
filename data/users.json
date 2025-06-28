@@ -1,1 +1,22 @@
-{}
+[
+  {
+    "id": "sozer",
+    "name": "Sözer",
+    "xp": 340,
+    "power": 90,
+    "level": 5,
+    "coins": 200,
+    "referrals": 0,
+    "chestBoost": 0
+  },
+  {
+    "id": "rakip",
+    "name": "Rakip",
+    "xp": 300,
+    "power": 85,
+    "level": 5,
+    "coins": 180,
+    "referrals": 0,
+    "chestBoost": 0
+  }
+]
