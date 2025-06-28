@@ -5,9 +5,7 @@
     "xp": 340,
     "power": 90,
     "level": 5,
-    "coins": 200,
-    "referrals": 0,
-    "chestBoost": 0
+    "coins": 200
   },
   {
     "id": "rakip",
@@ -15,8 +13,22 @@
     "xp": 300,
     "power": 85,
     "level": 5,
-    "coins": 180,
-    "referrals": 0,
-    "chestBoost": 0
+    "coins": 180
+  },
+  {
+    "id": "mert",
+    "name": "Mert",
+    "xp": 210,
+    "power": 78,
+    "level": 3,
+    "coins": 130
+  },
+  {
+    "id": "sare",
+    "name": "Sare",
+    "xp": 190,
+    "power": 75,
+    "level": 2,
+    "coins": 110
   }
 ]
