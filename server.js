@@ -54,6 +54,47 @@ app.post("/api/pvp", (req, res) => {
     opponent: { name: opponent.name }
   });
 });
+//arena
+app.post("/api/arena", (req, res) => {
+  const { userId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  // Takıma random bir kullanıcı ekle (kendisi hariç)
+  let available = users.filter(u => u.id !== userId);
+  if (available.length < 3) return res.status(400).json({ error: "Yeterli oyuncu yok!" });
+
+  // Takım: user + random bir oyuncu
+  let teammate = available[Math.floor(Math.random() * available.length)];
+  let rest = available.filter(u => u.id !== teammate.id);
+
+  // Rakip takım: random iki kişi
+  let rival1 = rest[Math.floor(Math.random() * rest.length)];
+  let rival2 = rest.filter(u => u.id !== rival1.id)[0];
+
+  // Savaş mantığı: toplam güç + random
+  let teamScore = user.power + teammate.power + Math.random() * 30;
+  let rivalScore = rival1.power + rival2.power + Math.random() * 30;
+  let win = teamScore >= rivalScore;
+  let xpGain = win ? 80 : 30;
+  let coinGain = win ? 50 : 15;
+
+  user.xp += xpGain;
+  user.coins = (user.coins || 0) + coinGain;
+
+  // users dizisini güncelle
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+
+  res.json({
+    result: win ? "Kazandınız!" : "Kaybettiniz!",
+    team: [user, teammate],
+    rivals: [rival1, rival2],
+    xp: xpGain,
+    coins: coinGain
+  });
+});
 
 // Sunucu başlat
 const PORT = process.env.PORT || 3000;
