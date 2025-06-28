@@ -23,6 +23,7 @@ app.get("/api/user/:id", (req, res) => {
 
 // PvP endpoint
 app.post("/api/pvp", (req, res) => {
+  console.log("PVP POST BODY:", req.body);
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
   let user = users.find(u => u.id === userId);
