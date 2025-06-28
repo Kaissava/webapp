@@ -25,7 +25,7 @@
     <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
-    let userId = "sozer"; // Test için sabit, sonra login ile dinamik yapılacak
+    let userId = "sozer"; // Test için sabit
 
     function loadMarket() {
       fetch('/api/market')
@@ -42,3 +42,24 @@
         });
     }
 
+    function buyItem(itemId) {
+      fetch('/api/buy', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId, itemId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('marketResult').innerText = "Hata: " + data.error;
+        } else {
+          document.getElementById('marketResult').innerText = `${data.message} Kalan coin: ${data.coins}`;
+        }
+      });
+    }
+
+    // --- EN ÖNEMLİSİ: SAYFA AÇILIR AÇILMAZ ÇAĞRILACAK ---
+    loadMarket();
+  </script>
+</body>
+</html>
