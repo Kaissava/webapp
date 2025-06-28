@@ -28,7 +28,7 @@
       justify-content: center;
       max-width: 600px;
     }
-    button {
+    button, a.btn {
       background: #2563eb;
       border: none;
       color: white;
@@ -44,18 +44,16 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      text-decoration: none;
+      text-align: center;
     }
-    button:hover {
+    button:hover, a.btn:hover {
       background: #1e40af;
       transform: scale(1.05);
       box-shadow: 0 6px 14px rgba(30, 64, 175, 0.8);
     }
-    button:active {
+    button:active, a.btn:active {
       transform: scale(0.98);
-    }
-    button svg {
-      width: 24px;
-      height: 24px;
     }
   </style>
 </head>
@@ -63,22 +61,11 @@
   <h1>KAISSAVA</h1>
 
   <div class="menu-buttons">
-    <button onclick="goTo('pvp')" aria-label="PvP">⚔️ PvP</button>
-    <button onclick="goTo('arena')" aria-label="Arena">🏟️ Arena</button>
-    <button onclick="goTo('league')" aria-label="Lig">🏆 Lig</button>
-    <button onclick="goTo('profile')" aria-label="Profil">👤 Profil</button>
+    <a href="pvp.html" class="btn" aria-label="PvP">⚔️ PvP</a>
+    <a href="arena.html" class="btn" aria-label="Arena">🏟️ Arena</a>
+    <a href="league.html" class="btn" aria-label="Lig">🏆 Lig</a>
+    <a href="profile.html" class="btn" aria-label="Profil">👤 Profil</a>
   </div>
 
-  <script>
-    function goTo(page) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const userId = urlParams.get('user_id');
-      if (!userId) {
-        alert('Kullanıcı ID bulunamadı!');
-        return;
-      }
-      window.location.href = `/${page}.html?user_id=${userId}`;
-    }
-  </script>
 </body>
 </html>
