@@ -1,58 +1,44 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KAISSAVA - Arena</title>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Arena (2v2)</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1f2937, #4b5563);
-      color: #f9fafb;
-      padding: 2rem;
-      max-width: 600px;
-      margin: auto;
-      position: relative;
-      text-align: center;
-    }
-    h1 {
-      text-shadow: 0 0 8px #2563eb;
-    }
-    /* Geri butonu */
-    .back-button {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-size: 14px;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.7);
-      transition: background 0.3s ease;
-      z-index: 1000;
-    }
-    .back-button:hover {
-      background: #1e40af;
-    }
+    body { background: #212832; color: #ffcc00; font-family: 'Segoe UI', sans-serif; }
+    .arena-container { display: flex; flex-direction: column; align-items: center; margin-top: 60px;}
+    .arena-btn { background: #2563eb; color: #fff; border: none; padding: 22px 60px; border-radius: 16px; font-size: 1.5em; margin: 16px; cursor: pointer; transition:.2s;}
+    .arena-btn:hover { background: #1e40af; transform: scale(1.07);}
+    .arena-result { margin-top: 24px; font-size: 1.2em; color: #fbbf24;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 35px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
-  <button class="back-button" onclick="goBack()">← Geri</button>
-  <h1>Sayfa Başlığı</h1>
-  <p>Buraya içerik gelecek.</p>
-
+  <div class="arena-container">
+    <h1>Arena 2v2</h1>
+    <button class="arena-btn" onclick="startArena()">Takımını Kur & Savaşa Başla</button>
+    <div id="arenaResult" class="arena-result"></div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+  </div>
   <script>
-    function goBack() {
-      const params = new URLSearchParams(window.location.search);
-      const userId = params.get('user_id');
-      if(userId) {
-        window.location.href = `/index.html?user_id=${userId}`;
-      } else {
-        window.location.href = '/index.html';
-      }
+    function startArena() {
+      fetch('/api/arena', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId: "sozer" })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('arenaResult').innerText = "Hata: " + data.error;
+        } else {
+          document.getElementById('arenaResult').innerText =
+            `Takımın: ${data.team.map(t => t.name).join(', ')}\n` +
+            `Rakip Takım: ${data.rivals.map(t => t.name).join(', ')}\n` +
+            `Sonuç: ${data.result}\n` +
+            `XP: ${data.xp}, Coin: ${data.coins}`;
+        }
+      });
     }
   </script>
 </body>
