@@ -1,3 +1,5 @@
+const BAZAAR_FILE = path.join(__dirname, "data", "bazaar.json");
+
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
