@@ -5,4 +5,45 @@
   <title>KAISSAVA - Pazar</title>
   <style>
     body { background: #1d1e26; color: #ffcc00; font-family: 'Segoe UI', sans-serif; }
-    .container { max-width: 440px; margin: 80px auto; background: #181b
+    .container { max-width: 440px; margin: 80px auto; background: #181b24; padding: 44px 30px; border-radius: 18px; box-shadow: 0 4px 32px #0008; display: flex; flex-direction: column; align-items: center;}
+    h1 { text-align: center; margin-bottom: 34px; letter-spacing: 1px;}
+    .menu-btn {
+      width: 100%;
+      background: linear-gradient(90deg,#ffe98a,#ffcc00 70%);
+      color: #181b24;
+      border: none;
+      padding: 22px 0;
+      font-size: 1.35em;
+      font-weight: bold;
+      border-radius: 14px;
+      margin-bottom: 28px;
+      cursor: pointer;
+      transition: background 0.22s, transform 0.16s;
+      box-shadow: 0 4px 20px #0003;
+    }
+    .menu-btn:last-child { margin-bottom: 0; }
+    .menu-btn:hover {
+      background: linear-gradient(90deg, #ffefb1, #ffe441 60%);
+      transform: scale(1.04);
+    }
+    .desc { font-size: 1.06em; color: #fff7c2; margin-bottom: 32px; text-align: center;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 18px; padding: 10px 32px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pazar</h1>
+    <div class="desc">Oyun içi pazar alanına hoş geldin.<br>
+      Burada diğer oyunculardan ekipman alabilir veya envanterindeki ekipmanları satışa çıkarabilirsin.
+    </div>
+    <button class="menu-btn" onclick="window.location.href='buy.html'">
+      🛍️ Pazardan Ekipman <b>Al</b>
+    </button>
+    <button class="menu-btn" onclick="window.location.href='sell.html'">
+      📦 Pazarda Ekipman <b>Sat</b>
+    </button>
+    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+  </div>
+</body>
+</html>
