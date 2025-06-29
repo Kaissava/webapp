@@ -1,1 +1,47 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Hazine Sandığı</title>
+  <style>
+    body { background: #211d25; color: #ffe98a; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 450px; margin: 60px auto; background: #19161a; padding: 36px; border-radius: 18px; box-shadow: 0 6px 28px #0007;}
+    h1 { text-align: center; margin-bottom: 36px;}
+    .chest-btn { background: #ffcc00; color: #1f2937; border: none; border-radius: 16px; padding: 20px 58px; font-size: 1.45em; cursor: pointer; transition:.15s;}
+    .chest-btn:hover { background: #ffe441; }
+    .result { margin-top: 24px; color: #88ff88; font-size: 1.17em; min-height: 38px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hazine Sandığı</h1>
+    <button class="chest-btn" onclick="openChest()">Sandığı Aç!</button>
+    <div class="result" id="chestResult"></div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+  </div>
+  <script>
+    let userId = "sozer"; // Test için sabit
+
+    function openChest() {
+      fetch('/api/chest', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('chestResult').innerText = "Hata: " + data.error;
+        } else {
+          let result = `Ödül: ${data.reward}\n`;
+          if (data.item) result += `Kazandığın eşya: ${data.item}`;
+          document.getElementById('chestResult').innerText = result;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
 
