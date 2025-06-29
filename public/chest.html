@@ -9,39 +9,96 @@
     h1 { text-align: center; margin-bottom: 36px;}
     .chest-btn { background: #ffcc00; color: #1f2937; border: none; border-radius: 16px; padding: 20px 58px; font-size: 1.45em; cursor: pointer; transition:.15s;}
     .chest-btn:hover { background: #ffe441; }
-    .result { margin-top: 24px; color: #88ff88; font-size: 1.17em; min-height: 38px;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .boost-btn { background: #38b6ff; color: #1f2937; border: none; border-radius: 10px; padding: 12px 28px; font-size: 1.07em; margin-left: 8px; cursor: pointer; }
+    .boost-btn:hover { background: #86e4fa; }
+    .result { margin-top: 20px; color: #88ff88; font-size: 1.1em; min-height: 34px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 30px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
+    .timer { color: #ffe441; margin-top: 6px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Hazine Sandığı</h1>
-    <button class="chest-btn" onclick="openChest()">Sandığı Aç!</button>
+    <div class="timer" id="chestTimer"></div>
+    <div style="margin-bottom:18px;">
+      <button class="chest-btn" onclick="claimChest()">Topla!</button>
+      <button class="boost-btn" onclick="boostChest()">Boost Satın Al</button>
+    </div>
     <div class="result" id="chestResult"></div>
     <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
     let userId = "sozer"; // Test için sabit
+    let boostExpire = 0;
+    let boosted = false;
+    let interval = null;
 
-    function openChest() {
-      fetch('/api/chest', {
+    function msToTime(ms) {
+      let s = Math.floor(ms / 1000);
+      let m = Math.floor(s / 60);
+      let h = Math.floor(m / 60);
+      let d = Math.floor(h / 24);
+      h = h % 24;
+      m = m % 60;
+      s = s % 60;
+      let str = '';
+      if(d > 0) str += d+"g ";
+      if(h > 0) str += h+"s ";
+      if(m > 0) str += m+"d ";
+      if(s > 0) str += s+"s";
+      return str.trim() || "0s";
+    }
+
+    function updateChest() {
+      fetch(`/api/chest-status/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          let txt = `Sandıkta biriken coin: <b>${data.coin}</b> / <b>${data.boosted ? 100 : 50}</b>`;
+          if(data.boosted) {
+            txt += `<br>Boost aktif! Bitmesine kalan: <b>${msToTime(data.boostLeft)}</b>`;
+          }
+          document.getElementById('chestTimer').innerHTML = txt;
+          boostExpire = data.boostExpire;
+          boosted = data.boosted;
+        });
+    }
+
+    function claimChest() {
+      fetch('/api/chest-claim', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ userId })
       })
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          document.getElementById('chestResult').innerText = "Hata: " + data.error;
-        } else {
-          let result = `Ödül: ${data.reward}\n`;
-          if (data.item) result += `Kazandığın eşya: ${data.item}`;
-          document.getElementById('chestResult').innerText = result;
-        }
+        document.getElementById('chestResult').innerText = `Toplanan: ${data.coin} coin! Toplam coin: ${data.totalCoins}`;
+        updateChest();
       });
     }
+
+    function boostChest() {
+      if(boosted) {
+        alert("Boost zaten aktif!");
+        return;
+      }
+      // Buraya gerçek TON payment API entegrasyonu eklenecek.
+      if(!confirm("0.5 $TON ile boost satın almak istediğine emin misin?")) return;
+
+      fetch('/api/chest-boost', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        updateChest();
+      });
+    }
+
+    updateChest();
+    interval = setInterval(updateChest, 8000);
   </script>
 </body>
 </html>
-
