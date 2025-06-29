@@ -1,14 +1,12 @@
-const BAZAAR_FILE = path.join(__dirname, "data", "bazaar.json");
-
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const app = express();
 
-const USERS_FILE = path.join(__dirname, "data", "users.json"); // data/users.json
-const MARKET_FILE = path.join(__dirname, "data", "market.json"); // data/market.json
+const USERS_FILE = path.join(__dirname, "data", "users.json");
+const MARKET_FILE = path.join(__dirname, "data", "market.json");
+const BAZAAR_FILE = path.join(__dirname, "data", "bazaar.json");
 
-// Sandık ayarları
 const COIN_PER_DAY = 50;
 const COIN_PER_DAY_BOOST = 100;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -96,7 +94,7 @@ app.post("/api/arena", (req, res) => {
   });
 });
 
-// --- MARKET MODÜLÜ --- //
+// MARKET MODÜLÜ
 app.get("/api/market", (req, res) => {
   let items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
   res.json(items);
@@ -128,8 +126,89 @@ app.post("/api/buy", (req, res) => {
   });
 });
 
-// --- HAZİNE SANDIĞI (CHEST) MODÜLÜ --- //
+// --- PAZAR (BAZAAR) MODÜLÜ --- //
+// Pazar listele
+app.get('/api/bazaar', (req, res) => {
+  let items = [];
+  if (fs.existsSync(BAZAAR_FILE)) {
+    items = JSON.parse(fs.readFileSync(BAZAAR_FILE, "utf-8"));
+  }
+  res.json(items);
+});
 
+// Eşya pazara koy
+app.post('/api/bazaar', (req, res) => {
+  const { userId, itemId, price } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+  user.inventory = user.inventory || [];
+  if (!user.inventory.includes(itemId)) return res.status(400).json({ error: "Eşya envanterinde yok!" });
+
+  // Eşyayı envanterden çıkar
+  user.inventory = user.inventory.filter(i => i !== itemId);
+
+  // Pazara ekle
+  let bazaar = [];
+  if (fs.existsSync(BAZAAR_FILE)) {
+    bazaar = JSON.parse(fs.readFileSync(BAZAAR_FILE, "utf-8"));
+  }
+  const newId = "b" + (bazaar.length + 1);
+  bazaar.push({
+    id: newId,
+    sellerId: userId,
+    itemId,
+    price: Number(price)
+  });
+
+  // Güncelle
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  fs.writeFileSync(BAZAAR_FILE, JSON.stringify(bazaar, null, 2), "utf-8");
+
+  res.json({ message: "Eşya pazara eklendi!" });
+});
+
+// Pazardan satın al
+app.post('/api/buy-bazaar', (req, res) => {
+  const { userId, bazaarId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let buyer = users.find(u => u.id === userId);
+  if (!buyer) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  let bazaar = JSON.parse(fs.readFileSync(BAZAAR_FILE, "utf-8"));
+  let offer = bazaar.find(b => b.id === bazaarId);
+  if (!offer) return res.status(404).json({ error: "Pazar teklifi bulunamadı!" });
+  if (offer.sellerId === userId) return res.status(400).json({ error: "Kendi ürününü satın alamazsın!" });
+
+  // Ürünü satanı bul ve para aktar
+  let seller = users.find(u => u.id === offer.sellerId);
+  if (!seller) return res.status(400).json({ error: "Satıcı bulunamadı!" });
+
+  if ((buyer.coins || 0) < offer.price) return res.status(400).json({ error: "Yetersiz coin!" });
+
+  // Alıcıdan coin çıkar, satıcıya coin ekle, eşyayı alıcıya ver
+  buyer.coins -= offer.price;
+  seller.coins = (seller.coins || 0) + offer.price;
+  buyer.inventory = buyer.inventory || [];
+  buyer.inventory.push(offer.itemId);
+
+  // Pazardan sil
+  bazaar = bazaar.filter(b => b.id !== bazaarId);
+
+  // Dosyalara yaz
+  users = users.map(u => {
+    if (u.id === buyer.id) return buyer;
+    if (u.id === seller.id) return seller;
+    return u;
+  });
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  fs.writeFileSync(BAZAAR_FILE, JSON.stringify(bazaar, null, 2), "utf-8");
+
+  res.json({ message: "Satın alma başarılı!" });
+});
+
+// --- HAZİNE SANDIĞI (CHEST) MODÜLÜ --- //
 // SANDIK DURUMU
 app.get('/api/chest-status/:userId', (req, res) => {
   const { userId } = req.params;
