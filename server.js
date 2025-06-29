@@ -123,6 +123,48 @@ app.post("/api/buy", (req, res) => {
     coins: user.coins
   });
 });
+// Hazine Sandığı
+app.post("/api/chest", (req, res) => {
+  const { userId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  // Ödül tipini rastgele belirle: xp, coin, item
+  const rewards = [
+    { type: "xp", value: Math.floor(Math.random() * 50) + 30 },
+    { type: "coin", value: Math.floor(Math.random() * 60) + 20 },
+    { type: "item", value: null }
+  ];
+  const chosen = rewards[Math.floor(Math.random() * rewards.length)];
+
+  let rewardMessage = "";
+  let itemName = null;
+
+  if (chosen.type === "xp") {
+    user.xp += chosen.value;
+    rewardMessage = `${chosen.value} XP`;
+  } else if (chosen.type === "coin") {
+    user.coins = (user.coins || 0) + chosen.value;
+    rewardMessage = `${chosen.value} coin`;
+  } else if (chosen.type === "item") {
+    // Marketten rastgele bir eşya seç
+    const items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+    const item = items[Math.floor(Math.random() * items.length)];
+    user.inventory = user.inventory || [];
+    user.inventory.push(item.id);
+    itemName = item.name;
+    rewardMessage = "Eşya";
+  }
+
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+
+  res.json({
+    reward: rewardMessage,
+    item: itemName
+  });
+});
 
 // Sunucu başlat
 const PORT = process.env.PORT || 3000;
