@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Pazara Ekle</title>
+  <style>
+    body { background: #1a1b23; color: #ffe98a; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 450px; margin: 60px auto; background: #16191c; padding: 32px; border-radius: 16px; box-shadow: 0 4px 16px #0006;}
+    h1 { text-align: center; margin-bottom: 20px;}
+    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 6px 18px; font-size: 1em; cursor: pointer; transition: .15s;}
+    .btn:hover { background: #1e40af;}
+    .result { margin-top: 18px; color: #90ee90; min-height: 22px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 32px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+    .price { width: 60px; border-radius: 5px; border: 1px solid #aaa; padding: 2px; margin-left: 8px;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pazara Ekle</h1>
+    <div id="inventoryList"></div>
+    <div class="result" id="sellResult"></div>
+    <button class="back-btn" onclick="window.location.href='bazaar_menu.html'">Pazar Menüsüne Dön</button>
+  </div>
+  <script>
+    let userId = "sozer"; // örnek
+    let itemsMeta = {};
+
+    function loadItemsMeta(callback) {
+      fetch('/api/market')
+        .then(res => res.json())
+        .then(list => {
+          list.forEach(item => itemsMeta[item.id] = item.name);
+          if (callback) callback();
+        });
+    }
+
+    function loadInventory() {
+      fetch(`/api/user/${userId}`)
+        .then(res => res.json())
+        .then(user => {
+          let html = '';
+          if(!user.inventory || user.inventory.length === 0) {
+            html = '<i>Envanterde hiç eşya yok.</i>';
+          } else {
+            user.inventory.forEach(itemId => {
+              let name = itemsMeta[itemId] || itemId;
+              html += `<div class="item">
+                <span>${name} (${itemId})</span>
+                <input type="number" class="price" placeholder="Fiyat" id="price_${itemId}">
+                <button class="btn" onclick="sellItem('${itemId}')">Pazara Ekle</button>
+              </div>`;
+            });
+          }
+          document.getElementById('inventoryList').innerHTML = html;
+        });
+    }
+
+    function sellItem(itemId) {
+      const price = document.getElementById(`price_${itemId}`).value.trim();
+      if(!price || isNaN(price)) {
+        alert("Lütfen geçerli bir fiyat girin!");
+        return;
+      }
+      fetch('/api/bazaar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId, itemId, price })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('sellResult').innerText = data.error ? "Hata: " + data.error : data.message;
+        loadInventory();
+      });
+    }
+
+    loadItemsMeta(loadInventory);
+  </script>
+</body>
+</html>
