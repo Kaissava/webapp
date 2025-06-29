@@ -6,6 +6,12 @@ const app = express();
 const USERS_FILE = path.join(__dirname, "data", "users.json"); // data/users.json
 const MARKET_FILE = path.join(__dirname, "data", "market.json"); // data/market.json
 
+// Sandık ayarları
+const COIN_PER_DAY = 50;
+const COIN_PER_DAY_BOOST = 100;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MS_PER_30_DAYS = 30 * MS_PER_DAY;
+
 app.use(express.json());
 app.use(express.static("public"));
 
@@ -23,7 +29,6 @@ app.get("/api/user/:id", (req, res) => {
 
 // PvP endpoint
 app.post("/api/pvp", (req, res) => {
-  console.log("PVP POST BODY:", req.body);
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
   let user = users.find(u => u.id === userId);
@@ -90,13 +95,11 @@ app.post("/api/arena", (req, res) => {
 });
 
 // --- MARKET MODÜLÜ --- //
-// Marketteki eşyaların listesi
 app.get("/api/market", (req, res) => {
   let items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
   res.json(items);
 });
 
-// Satın alma işlemi
 app.post("/api/buy", (req, res) => {
   const { userId, itemId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -109,7 +112,6 @@ app.post("/api/buy", (req, res) => {
 
   if (user.coins < item.price) return res.status(400).json({ error: "Yetersiz coin!" });
 
-  // Envantere ekle
   user.inventory = user.inventory || [];
   user.inventory.push(itemId);
 
@@ -123,47 +125,81 @@ app.post("/api/buy", (req, res) => {
     coins: user.coins
   });
 });
-// Hazine Sandığı
-app.post("/api/chest", (req, res) => {
+
+// --- HAZİNE SANDIĞI (CHEST) MODÜLÜ --- //
+
+// SANDIK DURUMU
+app.get('/api/chest-status/:userId', (req, res) => {
+  const { userId } = req.params;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  const now = Date.now();
+  const lastClaim = user.chest?.lastClaim || 0;
+  const boostExpire = user.chest?.boostExpire || 0;
+  const boosted = boostExpire > now;
+  const maxCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
+  let earned = Math.floor((now - lastClaim) / MS_PER_DAY * maxCoin);
+  if (earned > maxCoin) earned = maxCoin;
+
+  let nextFull = lastClaim + MS_PER_DAY;
+  let timeLeft = Math.max(0, nextFull - now);
+  let boostLeft = Math.max(0, boostExpire - now);
+
+  res.json({
+    coin: earned,
+    timeLeft,
+    boosted,
+    boostExpire,
+    boostLeft
+  });
+});
+
+// SANDIĞI TOPLA
+app.post('/api/chest-claim', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
   let user = users.find(u => u.id === userId);
   if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
 
-  // Ödül tipini rastgele belirle: xp, coin, item
-  const rewards = [
-    { type: "xp", value: Math.floor(Math.random() * 50) + 30 },
-    { type: "coin", value: Math.floor(Math.random() * 60) + 20 },
-    { type: "item", value: null }
-  ];
-  const chosen = rewards[Math.floor(Math.random() * rewards.length)];
+  const now = Date.now();
+  const lastClaim = user.chest?.lastClaim || 0;
+  const boostExpire = user.chest?.boostExpire || 0;
+  const boosted = boostExpire > now;
+  const maxCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
 
-  let rewardMessage = "";
-  let itemName = null;
+  let earned = Math.floor((now - lastClaim) / MS_PER_DAY * maxCoin);
+  if (earned > maxCoin) earned = maxCoin;
 
-  if (chosen.type === "xp") {
-    user.xp += chosen.value;
-    rewardMessage = `${chosen.value} XP`;
-  } else if (chosen.type === "coin") {
-    user.coins = (user.coins || 0) + chosen.value;
-    rewardMessage = `${chosen.value} coin`;
-  } else if (chosen.type === "item") {
-    // Marketten rastgele bir eşya seç
-    const items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
-    const item = items[Math.floor(Math.random() * items.length)];
-    user.inventory = user.inventory || [];
-    user.inventory.push(item.id);
-    itemName = item.name;
-    rewardMessage = "Eşya";
-  }
+  user.coins = (user.coins || 0) + earned;
+  user.chest = { lastClaim: now, boostExpire: boostExpire };
 
   users = users.map(u => (u.id === userId ? user : u));
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
 
   res.json({
-    reward: rewardMessage,
-    item: itemName
+    coin: earned,
+    totalCoins: user.coins
   });
+});
+
+// BOOST SATIN AL (30 GÜN BOYUNCA AKTİF)
+app.post('/api/chest-boost', (req, res) => {
+  const { userId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  // Boost 30 gün boyunca aktif
+  const now = Date.now();
+  user.chest = user.chest || {};
+  user.chest.boostExpire = now + MS_PER_30_DAYS;
+
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+
+  res.json({ message: "Boost aktif! 30 gün boyunca sandık hızlı dolacak." });
 });
 
 // Sunucu başlat
