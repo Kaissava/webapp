@@ -16,21 +16,17 @@
       height: 100vh;
       margin: 0;
     }
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 2rem;
-      text-shadow: 0 0 8px #2563eb;
-    }
+    h1 { font-size: 3rem; margin-bottom: 2rem; text-shadow: 0 0 8px #2563eb; }
     .menu-buttons {
       display: flex;
       gap: 1.5rem;
       flex-wrap: wrap;
       justify-content: center;
-      max-width: 700px;
+      max-width: 600px;
     }
-    button, a.btn {
+    a.btn {
+      text-decoration: none;
       background: #2563eb;
-      border: none;
       color: white;
       padding: 1rem 2rem;
       font-size: 1.25rem;
@@ -38,39 +34,25 @@
       border-radius: 12px;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
-      transition: background 0.3s ease, transform 0.2s ease;
+      transition: background 0.3s, transform 0.2s;
       min-width: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      text-decoration: none;
-      text-align: center;
+      margin-bottom: 10px;
     }
-    button:hover, a.btn:hover {
-      background: #1e40af;
-      transform: scale(1.05);
-      box-shadow: 0 6px 14px rgba(30, 64, 175, 0.8);
-    }
-    button:active, a.btn:active {
-      transform: scale(0.98);
-    }
+    a.btn:hover { background: #1e40af; transform: scale(1.05); }
   </style>
 </head>
 <body>
   <h1>KAISSAVA</h1>
-
   <div class="menu-buttons">
-    <a href="pvp.html" class="btn" aria-label="PvP">⚔️ PvP</a>
-    <a href="arena.html" class="btn" aria-label="Arena">🏟️ Arena</a>
-    <a href="league.html" class="btn" aria-label="Lig">🏆 Lig</a>
-    <a href="market.html" class="btn" aria-label="Market">🛒 Market</a>
-    <a href="profile.html" class="btn" aria-label="Profil">👤 Profil</a>
-    <a href="chest.html" class="btn" aria-label="Chest">🪙 Hazine Sandığı</a>
-    <a href="bazaar.html" class="btn" aria-label="Bazaar">🛍️ Pazar</a>
-
-
+    <a href="pvp.html" class="btn">⚔️ PvP</a>
+    <a href="arena.html" class="btn">🏟️ Arena</a>
+    <a href="market.html" class="btn">🛒 Market</a>
+    <a href="chest.html" class="btn">🎁 Sandık</a>
+    <a href="bazaar_menu.html" class="btn">🛒 Pazar</a>
   </div>
-
 </body>
 </html>
