@@ -1,2 +1,88 @@
-[]
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Pazar</title>
+  <style>
+    body { background: #23272f; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 480px; margin: 60px auto; background: #1a1c22; padding: 32px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 30px;}
+    .offer { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 7px 18px; font-size: 1em; cursor: pointer; transition: .18s;}
+    .btn:hover { background: #1e40af;}
+    .result { margin-top: 18px; color: #90ee90; min-height: 22px;}
+    .sell-block { margin: 20px 0; padding: 10px; background: #181b24; border-radius: 9px;}
+    .sell-block input { border: none; padding: 5px; border-radius: 7px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pazar</h1>
+    <div class="sell-block">
+      <b>Pazara Eşya Koy</b><br>
+      <input id="itemId" placeholder="Eşya ID (örn: sword)">
+      <input id="price" type="number" placeholder="Fiyat">
+      <button class="btn" onclick="sellItem()">Pazara Ekle</button>
+    </div>
+    <div id="bazaarList"></div>
+    <div class="result" id="bazaarResult"></div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+  </div>
+  <script>
+    let userId = "sozer"; // test için sabit
+
+    function loadBazaar() {
+      fetch('/api/bazaar')
+        .then(res => res.json())
+        .then(items => {
+          let html = '';
+          items.forEach(item => {
+            html += `<div class="offer">
+              <span><b>${item.itemId}</b> - ${item.price} coin (Satıcı: ${item.sellerId})</span>
+              <button class="btn" onclick="buyBazaar('${item.id}')">Satın Al</button>
+            </div>`;
+          });
+          document.getElementById('bazaarList').innerHTML = html;
+        });
+    }
+
+    function sellItem() {
+      const itemId = document.getElementById('itemId').value.trim();
+      const price = document.getElementById('price').value.trim();
+      if(!itemId || !price) {
+        alert("Lütfen eşya ID ve fiyat girin.");
+        return;
+      }
+      fetch('/api/bazaar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId, itemId, price })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('bazaarResult').innerText = data.error ? "Hata: " + data.error : data.message;
+        loadBazaar();
+      });
+    }
+
+    function buyBazaar(bazaarId) {
+      fetch('/api/buy-bazaar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId, bazaarId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('bazaarResult').innerText = data.error ? "Hata: " + data.error : data.message;
+        loadBazaar();
+      });
+    }
+
+    loadBazaar();
+  </script>
+</body>
+</html>
+
 
