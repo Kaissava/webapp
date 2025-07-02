@@ -30,7 +30,8 @@
     <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
-    let userId = "sozer"; // Kullanıcıya göre değişir!
+    let userId = localStorage.getItem("kaissava_userid") || null;
+    if (!userId) { window.location.href = "register.html"; }
     function loadRef() {
       fetch("/api/user/" + userId)
         .then(res => res.json())
