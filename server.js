@@ -283,6 +283,14 @@ app.post('/api/chest-boost', (req, res) => {
   res.json({ message: "Boost aktif! 30 gün boyunca sandık hızlı dolacak." });
 });
 
+// Liderlik tablosu (en çok XP'ye sahip 20 oyuncu)
+app.get('/api/leaderboard', (req, res) => {
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  users.sort((a, b) => b.xp - a.xp); // XP'ye göre sıralama
+  res.json(users.slice(0, 20)); // En iyi 20 oyuncu
+});
+
+
 // Sunucu başlat
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
