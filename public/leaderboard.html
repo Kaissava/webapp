@@ -1,54 +1,51 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>KAISSAVA - Liderlik Tablosu</title>
+  <meta charset="UTF-8" />
+  <title>KAISSAVA - Lig ve Liderlik</title>
   <style>
-    body { background: #181b24; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 530px; margin: 50px auto; background: #1a1c22; padding: 32px 28px; border-radius: 16px; box-shadow: 0 4px 24px #0004;}
+    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 520px; margin: 48px auto; background: #1a1c22; padding: 34px 36px; border-radius: 18px; box-shadow: 0 4px 22px #0003;}
     h1 { text-align: center; margin-bottom: 28px;}
-    table { width: 100%; border-collapse: collapse; margin-top: 15px;}
-    th, td { border-bottom: 1px solid #444; padding: 10px 0; text-align: left; }
-    th { background: #22243a; color: #ffd700;}
-    tr:nth-child(even) { background: #202233; }
-    tr:hover { background: #353857; }
-    .rank { font-weight: bold; }
+    table { width: 100%; border-collapse: collapse;}
+    th, td { padding: 10px 0; text-align: center; }
+    th { color: #ffd700; }
+    tr:nth-child(even) { background: #23272f;}
+    tr:nth-child(odd) { background: #181b24;}
+    .me { background: #113366 !important; font-weight: bold; }
     .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 30px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Liderlik Tablosu</h1>
+    <h1>Lig & Liderlik Tablosu</h1>
     <table>
       <thead>
         <tr>
-          <th>#</th>
-          <th>Oyuncu</th>
-          <th>Seviye</th>
-          <th>XP</th>
-          <th>Coin</th>
+          <th>#</th><th>Oyuncu</th><th>Seviye</th><th>XP</th><th>Güç</th>
         </tr>
       </thead>
-      <tbody id="leaderboardBody"></tbody>
+      <tbody id="lb"></tbody>
     </table>
     <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
+    let userId = "sozer";
     fetch('/api/leaderboard')
-      .then(res => res.json())
-      .then(list => {
-        let html = '';
-        list.forEach((user, idx) => {
-          html += `<tr>
-            <td class="rank">${idx + 1}</td>
-            <td>${user.name}</td>
-            <td>${user.level}</td>
-            <td>${user.xp}</td>
-            <td>${user.coins}</td>
+      .then(res=>res.json())
+      .then(users=>{
+        let html = "";
+        users.forEach((u, i) => {
+          html += `<tr${u.id===userId ? ' class="me"' : ''}>
+            <td>${i+1}</td>
+            <td>${u.name}</td>
+            <td>${u.level}</td>
+            <td>${u.xp}</td>
+            <td>${u.power}</td>
           </tr>`;
         });
-        document.getElementById('leaderboardBody').innerHTML = html;
+        document.getElementById('lb').innerHTML = html;
       });
   </script>
 </body>
