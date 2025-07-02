@@ -1,10 +1,18 @@
-{
-  "task1": {
-    "description": "Günlük giriş yap",
-    "reward": 10
+[
+  {
+    "id": "win_pvp",
+    "title": "3 PvP Maçı Kazan",
+    "desc": "3 adet PvP savaşını kazan.",
+    "target": 3,
+    "rewardType": "coin",
+    "reward": 50
   },
-  "task2": {
-    "description": "Bir maç kazan",
-    "reward": 20
+  {
+    "id": "collect_coins",
+    "title": "50 Coin Topla",
+    "desc": "Oyun oynayarak toplam 50 coin biriktir.",
+    "target": 50,
+    "rewardType": "xp",
+    "reward": 80
   }
-}
+]
