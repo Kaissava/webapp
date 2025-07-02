@@ -28,37 +28,6 @@
     let userId = localStorage.getItem("kaissava_userid") || null;
     if (!userId) { window.location.href = "register.html"; }
     function msToTime(ms) {
-      const s = Math.floor(ms / 1000) % 60;
-      const m = Math.floor(ms / 60000) % 60;
-      const h = Math.floor(ms / 3600000);
-      return h + "s " + m + "d " + s + "s";
-    }
-    function loadDaily() {
-      fetch("/api/daily/" + userId)
-        .then(res => res.json())
-        .then(data => {
-          if (data.canClaim) {
-            document.getElementById("dailyInfo").innerText = "Günlük ödülünü alabilirsin!";
-            document.getElementById("claimBtn").disabled = false;
-          } else {
-            document.getElementById("dailyInfo").innerText = "Bir sonraki ödül için kalan süre: " + msToTime(data.timeLeft);
-            document.getElementById("claimBtn").disabled = true;
-          }
-        });
-    }
-    function claimDaily() {
-      fetch("/api/daily", {
-        method: "POST",
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ userId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("dailyResult").innerText = data.message || data.error;
-        loadDaily();
-      });
-    }
-    loadDaily();
-  </script>
-</body>
-</html>
+      if (!ms || ms < 0) return "0s";
+      let seconds = Math.floor((ms / 1000) % 60);
+      let minutes = Math.floor((ms / (
