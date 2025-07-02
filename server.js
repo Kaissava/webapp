@@ -28,6 +28,37 @@ app.get("/api/user/:id", (req, res) => {
   }
 });
 
+// REFERANS SİSTEMİ: Arkadaş daveti ile kayıt
+app.post('/api/register-ref', (req, res) => {
+  const { newUserId, newName, referrerId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  if (users.find(u => u.id === newUserId)) {
+    return res.status(400).json({ error: "Bu kullanıcı zaten var!" });
+  }
+  // Yeni kullanıcıyı ekle
+  users.push({
+    id: newUserId,
+    name: newName,
+    xp: 0,
+    power: 50,
+    level: 1,
+    coins: 50,
+    inventory: [],
+    referrals: 0,
+    chestBoost: 0,
+    chest: {},
+    tasks: {}
+  });
+  // Referans edenin boostu +1
+  let refUser = users.find(u => u.id === referrerId);
+  if (refUser) {
+    refUser.referrals = (refUser.referrals || 0) + 1;
+    refUser.chestBoost = (refUser.chestBoost || 0) + 5;
+  }
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  res.json({ message: "Kayıt başarılı, referans bonusu uygulandı!" });
+});
+
 // PvP endpoint
 app.post("/api/pvp", (req, res) => {
   const { userId } = req.body;
@@ -77,7 +108,7 @@ app.post("/api/pvp", (req, res) => {
   });
 });
 
-// Arena endpoint
+// Arena endpoint (kısa, referans sistemiyle ilgili değil)
 app.post("/api/arena", (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -102,8 +133,6 @@ app.post("/api/arena", (req, res) => {
   user.xp += xpGain;
   user.coins = (user.coins || 0) + coinGain;
 
-  // (Buraya arena görevleri eklenebilir)
-
   users = users.map(u => (u.id === userId ? user : u));
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
 
@@ -116,12 +145,11 @@ app.post("/api/arena", (req, res) => {
   });
 });
 
-// MARKET MODÜLÜ
+// MARKET MODÜLÜ (kısa)
 app.get("/api/market", (req, res) => {
   let items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
   res.json(items);
 });
-
 app.post("/api/buy", (req, res) => {
   const { userId, itemId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -148,7 +176,7 @@ app.post("/api/buy", (req, res) => {
   });
 });
 
-// --- PAZAR (BAZAAR) MODÜLÜ ---
+// --- PAZAR (BAZAAR) MODÜLÜ (kısa)
 app.get('/api/bazaar', (req, res) => {
   let items = [];
   if (fs.existsSync(BAZAAR_FILE)) {
@@ -156,7 +184,6 @@ app.get('/api/bazaar', (req, res) => {
   }
   res.json(items);
 });
-
 app.post('/api/bazaar', (req, res) => {
   const { userId, itemId, price } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -187,7 +214,6 @@ app.post('/api/bazaar', (req, res) => {
 
   res.json({ message: "Eşya pazara eklendi!" });
 });
-
 app.post('/api/buy-bazaar', (req, res) => {
   const { userId, bazaarId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -225,7 +251,7 @@ app.post('/api/buy-bazaar', (req, res) => {
   res.json({ message: "Satın alma başarılı!" });
 });
 
-// --- HAZİNE SANDIĞI (CHEST) MODÜLÜ --- //
+// --- HAZİNE SANDIĞI (Referans boost entegre) ---
 app.get('/api/chest-status/:userId', (req, res) => {
   const { userId } = req.params;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -236,7 +262,11 @@ app.get('/api/chest-status/:userId', (req, res) => {
   const lastClaim = user.chest?.lastClaim || 0;
   const boostExpire = user.chest?.boostExpire || 0;
   const boosted = boostExpire > now;
-  const maxCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
+  let baseCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
+  // Referans boost oranı (%)
+  let boostRate = (user.chestBoost || 0) / 100;
+  let maxCoin = baseCoin * (1 + boostRate);
+
   let earned = Math.floor((now - lastClaim) / MS_PER_DAY * maxCoin);
   if (earned > maxCoin) earned = maxCoin;
 
@@ -249,10 +279,10 @@ app.get('/api/chest-status/:userId', (req, res) => {
     timeLeft,
     boosted,
     boostExpire,
-    boostLeft
+    boostLeft,
+    maxCoin
   });
 });
-
 app.post('/api/chest-claim', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -263,7 +293,9 @@ app.post('/api/chest-claim', (req, res) => {
   const lastClaim = user.chest?.lastClaim || 0;
   const boostExpire = user.chest?.boostExpire || 0;
   const boosted = boostExpire > now;
-  const maxCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
+  let baseCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
+  let boostRate = (user.chestBoost || 0) / 100;
+  let maxCoin = baseCoin * (1 + boostRate);
 
   let earned = Math.floor((now - lastClaim) / MS_PER_DAY * maxCoin);
   if (earned > maxCoin) earned = maxCoin;
@@ -289,14 +321,12 @@ app.post('/api/chest-claim', (req, res) => {
     totalCoins: user.coins
   });
 });
-
 app.post('/api/chest-boost', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
   let user = users.find(u => u.id === userId);
   if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
 
-  // Boost 30 gün boyunca aktif
   const now = Date.now();
   user.chest = user.chest || {};
   user.chest.boostExpire = now + MS_PER_30_DAYS;
@@ -314,7 +344,7 @@ app.get('/api/leaderboard', (req, res) => {
   res.json(users.slice(0, 20));
 });
 
-// GÖREVLER MODÜLÜ
+// GÖREVLER MODÜLÜ (kısa)
 app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -322,7 +352,6 @@ app.get('/api/tasks/:userId', (req, res) => {
   let tasks = JSON.parse(fs.readFileSync(TASKS_FILE, "utf-8"));
   user.tasks = user.tasks || {};
 
-  // Her görevin kullanıcıda bir ilerleme kaydı olsun
   tasks.forEach(task => {
     if (!user.tasks[task.id]) {
       user.tasks[task.id] = { progress: 0, completed: false, claimed: false };
@@ -331,7 +360,6 @@ app.get('/api/tasks/:userId', (req, res) => {
 
   res.json({ tasks, progress: user.tasks });
 });
-
 app.post('/api/tasks/claim', (req, res) => {
   const { userId, taskId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -346,7 +374,6 @@ app.post('/api/tasks/claim', (req, res) => {
     return res.status(400).json({ error: "Görev tamamlanmamış veya ödül alınmış!" });
   }
 
-  // Ödül ver (ör: coin/xp)
   if (task.rewardType === "coin") user.coins += task.reward;
   if (task.rewardType === "xp") user.xp += task.reward;
   user.tasks[taskId].claimed = true;
