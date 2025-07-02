@@ -7,7 +7,6 @@
     body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
     .container { max-width: 400px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
     h1 { text-align: center; margin-bottom: 32px;}
-    .info { margin-bottom: 18px; font-size:1.12em;}
     .reward { color: #90ee90; font-size:1.18em; }
     .status { margin-bottom: 12px; }
     .timer { color: #ffd700; font-size:1em; margin-top:2px;}
@@ -54,7 +53,9 @@
           } else {
             document.getElementById("dailyStatus").innerHTML = `<span style="color:#ffcc00">Ödül alındı</span>`;
             document.getElementById("claimBtn").disabled = true;
-            document.getElementById("dailyTimer").innerText = "Bir sonraki ödüle kalan süre: " + msToTime(data.timeLeft);
+            document.getElementById("dailyTimer").innerText = data.timeLeft > 0
+              ? "Bir sonraki ödüle kalan süre: " + msToTime(data.timeLeft)
+              : "Yarın tekrar dene!";
           }
         });
     }
