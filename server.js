@@ -44,6 +44,7 @@ app.post('/api/register-ref', (req, res) => {
     level: 1,
     coins: 50,
     inventory: [],
+    equipped: { weapon: null, armor: null, gloves: null }, // <---- DİKKAT!
     referrals: 0,
     chestBoost: 0,
     chest: {},
@@ -63,15 +64,35 @@ app.post('/api/register-ref', (req, res) => {
 app.post("/api/pvp", (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let market = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
   let user = users.find(u => u.id === userId);
+
   if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  // Güç hesaplaması: takılı ekipmanlar
+  let totalPower = user.power;
+  if (user.equipped) {
+    Object.values(user.equipped).forEach(eqId => {
+      let eqItem = market.find(i => i.id === eqId);
+      if (eqItem) totalPower += eqItem.power;
+    });
+  }
 
   let rivals = users.filter(u => u.id !== userId);
   if (rivals.length === 0) return res.status(400).json({ error: "Hiç rakip yok!" });
   let opponent = rivals[Math.floor(Math.random() * rivals.length)];
 
-  let userScore = user.power + Math.random() * 20 + user.level;
-  let oppScore = opponent.power + Math.random() * 20 + opponent.level;
+  // Rakip güç hesaplaması
+  let oppPower = opponent.power;
+  if (opponent.equipped) {
+    Object.values(opponent.equipped).forEach(eqId => {
+      let eqItem = market.find(i => i.id === eqId);
+      if (eqItem) oppPower += eqItem.power;
+    });
+  }
+
+  let userScore = totalPower + Math.random() * 20 + user.level;
+  let oppScore = oppPower + Math.random() * 20 + opponent.level;
   let userWins = userScore >= oppScore;
   let xpGain = userWins ? 50 : 15;
   let coinGain = userWins ? 30 : 10;
@@ -108,7 +129,7 @@ app.post("/api/pvp", (req, res) => {
   });
 });
 
-// Arena endpoint (kısa, referans sistemiyle ilgili değil)
+// Arena endpoint
 app.post("/api/arena", (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -145,7 +166,7 @@ app.post("/api/arena", (req, res) => {
   });
 });
 
-// MARKET MODÜLÜ (kısa)
+// MARKET MODÜLÜ
 app.get("/api/market", (req, res) => {
   let items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
   res.json(items);
@@ -176,6 +197,50 @@ app.post("/api/buy", (req, res) => {
   });
 });
 
+// --- EKİPMAN KUŞAN / ÇIKAR ENDPOINTLERİ ---
+app.post('/api/equip', (req, res) => {
+  const { userId, itemId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let market = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  user.inventory = user.inventory || [];
+  let item = market.find(i => i.id === itemId);
+  if (!item) return res.status(404).json({ error: "Eşya bulunamadı!" });
+  if (!user.inventory.includes(itemId)) return res.status(400).json({ error: "Eşya envanterinde yok!" });
+
+  user.equipped = user.equipped || {};
+  if (user.equipped[item.type]) {
+    user.inventory.push(user.equipped[item.type]);
+  }
+  user.inventory = user.inventory.filter(i => i !== itemId);
+  user.equipped[item.type] = itemId;
+
+  users = users.map(u => u.id === userId ? user : u);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  res.json({ message: `${item.name} kuşanıldı!` });
+});
+
+app.post('/api/unequip', (req, res) => {
+  const { userId, type } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let market = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  user.equipped = user.equipped || {};
+  if (!user.equipped[type]) return res.status(400).json({ error: "Bu türde ekipman takılı değil!" });
+
+  user.inventory = user.inventory || [];
+  user.inventory.push(user.equipped[type]);
+  user.equipped[type] = null;
+
+  users = users.map(u => u.id === userId ? user : u);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  res.json({ message: "Ekipman çıkarıldı!" });
+});
+
 // --- PAZAR (BAZAAR) MODÜLÜ (kısa)
 app.get('/api/bazaar', (req, res) => {
   let items = [];
@@ -192,10 +257,8 @@ app.post('/api/bazaar', (req, res) => {
   user.inventory = user.inventory || [];
   if (!user.inventory.includes(itemId)) return res.status(400).json({ error: "Eşya envanterinde yok!" });
 
-  // Eşyayı envanterden çıkar
   user.inventory = user.inventory.filter(i => i !== itemId);
 
-  // Pazara ekle
   let bazaar = [];
   if (fs.existsSync(BAZAAR_FILE)) {
     bazaar = JSON.parse(fs.readFileSync(BAZAAR_FILE, "utf-8"));
@@ -225,19 +288,16 @@ app.post('/api/buy-bazaar', (req, res) => {
   if (!offer) return res.status(404).json({ error: "Pazar teklifi bulunamadı!" });
   if (offer.sellerId === userId) return res.status(400).json({ error: "Kendi ürününü satın alamazsın!" });
 
-  // Ürünü satanı bul ve para aktar
   let seller = users.find(u => u.id === offer.sellerId);
   if (!seller) return res.status(400).json({ error: "Satıcı bulunamadı!" });
 
   if ((buyer.coins || 0) < offer.price) return res.status(400).json({ error: "Yetersiz coin!" });
 
-  // Alıcıdan coin çıkar, satıcıya coin ekle, eşyayı alıcıya ver
   buyer.coins -= offer.price;
   seller.coins = (seller.coins || 0) + offer.price;
   buyer.inventory = buyer.inventory || [];
   buyer.inventory.push(offer.itemId);
 
-  // Pazardan sil
   bazaar = bazaar.filter(b => b.id !== bazaarId);
 
   users = users.map(u => {
@@ -263,7 +323,6 @@ app.get('/api/chest-status/:userId', (req, res) => {
   const boostExpire = user.chest?.boostExpire || 0;
   const boosted = boostExpire > now;
   let baseCoin = boosted ? COIN_PER_DAY_BOOST : COIN_PER_DAY;
-  // Referans boost oranı (%)
   let boostRate = (user.chestBoost || 0) / 100;
   let maxCoin = baseCoin * (1 + boostRate);
 
@@ -303,7 +362,6 @@ app.post('/api/chest-claim', (req, res) => {
   user.coins = (user.coins || 0) + earned;
   user.chest = { lastClaim: now, boostExpire: boostExpire };
 
-  // Görev ilerlemesi: coin toplama
   user.tasks = user.tasks || {};
   user.tasks["collect_coins"] = user.tasks["collect_coins"] || { progress: 0, completed: false, claimed: false };
   if (!user.tasks["collect_coins"].completed) {
@@ -344,7 +402,7 @@ app.get('/api/leaderboard', (req, res) => {
   res.json(users.slice(0, 20));
 });
 
-// GÖREVLER MODÜLÜ (kısa)
+// GÖREVLER MODÜLÜ
 app.get('/api/tasks/:userId', (req, res) => {
   const { userId } = req.params;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
