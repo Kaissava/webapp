@@ -7,11 +7,14 @@
     body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
     .container { max-width: 400px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
     h1 { text-align: center; margin-bottom: 32px;}
-    .info { margin-bottom: 22px;}
+    .info { margin-bottom: 18px; font-size:1.12em;}
+    .reward { color: #90ee90; font-size:1.18em; }
+    .status { margin-bottom: 12px; }
+    .timer { color: #ffd700; font-size:1em; margin-top:2px;}
     .btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 8px 24px; font-size: 1em; cursor: pointer; transition: .18s;}
     .btn:disabled { background: #555; cursor: not-allowed;}
     .btn:hover { background: #1e40af;}
-    .result { margin-top: 22px; color: #90ee90; min-height: 26px;}
+    .result { margin-top: 20px; color: #90ee90; min-height: 26px;}
     .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
@@ -19,7 +22,9 @@
 <body>
   <div class="container">
     <h1>Günlük Ödül</h1>
-    <div class="info" id="dailyInfo"></div>
+    <div class="reward">Ödül: <b>25 coin + 15 XP</b></div>
+    <div class="status" id="dailyStatus"></div>
+    <div class="timer" id="dailyTimer"></div>
     <button class="btn" id="claimBtn" onclick="claimDaily()" disabled>Günlük Ödülünü Topla</button>
     <div class="result" id="dailyResult"></div>
     <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
@@ -28,6 +33,44 @@
     let userId = localStorage.getItem("kaissava_userid") || null;
     if (!userId) { window.location.href = "register.html"; }
     function msToTime(ms) {
-      if (!ms || ms < 0) return "0s";
+      if (!ms || ms < 0) return "0 saniye";
       let seconds = Math.floor((ms / 1000) % 60);
-      let minutes = Math.floor((ms / (
+      let minutes = Math.floor((ms / (1000 * 60)) % 60);
+      let hours = Math.floor(ms / (1000 * 60 * 60));
+      let parts = [];
+      if (hours) parts.push(hours + " saat");
+      if (minutes) parts.push(minutes + " dakika");
+      if (seconds) parts.push(seconds + " saniye");
+      return parts.join(" ") || "0 saniye";
+    }
+    function loadDaily() {
+      fetch("/api/daily/" + userId)
+        .then(res => res.json())
+        .then(data => {
+          if (data.canClaim) {
+            document.getElementById("dailyStatus").innerHTML = `<span style="color:#90ee90">Ödül alınabilir!</span>`;
+            document.getElementById("dailyTimer").innerText = "";
+            document.getElementById("claimBtn").disabled = false;
+          } else {
+            document.getElementById("dailyStatus").innerHTML = `<span style="color:#ffcc00">Ödül alındı</span>`;
+            document.getElementById("claimBtn").disabled = true;
+            document.getElementById("dailyTimer").innerText = "Bir sonraki ödüle kalan süre: " + msToTime(data.timeLeft);
+          }
+        });
+    }
+    function claimDaily() {
+      fetch("/api/daily", {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("dailyResult").innerText = data.message || data.error;
+        loadDaily();
+      });
+    }
+    loadDaily();
+  </script>
+</body>
+</html>
