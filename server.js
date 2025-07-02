@@ -6,6 +6,7 @@ const app = express();
 const USERS_FILE = path.join(__dirname, "data", "users.json");
 const MARKET_FILE = path.join(__dirname, "data", "market.json");
 const BAZAAR_FILE = path.join(__dirname, "data", "bazaar.json");
+const TASKS_FILE = path.join(__dirname, "data", "tasks.json");
 
 const COIN_PER_DAY = 50;
 const COIN_PER_DAY_BOOST = 100;
@@ -46,6 +47,25 @@ app.post("/api/pvp", (req, res) => {
   user.xp += xpGain;
   user.coins = (user.coins || 0) + coinGain;
 
+  // Görev ilerlemesi: PvP kazanma
+  user.tasks = user.tasks || {};
+  if (userWins) {
+    user.tasks["win_pvp"] = user.tasks["win_pvp"] || { progress: 0, completed: false, claimed: false };
+    if (!user.tasks["win_pvp"].completed) {
+      user.tasks["win_pvp"].progress += 1;
+      if (user.tasks["win_pvp"].progress >= 3) user.tasks["win_pvp"].completed = true;
+    }
+  }
+
+  // Görev ilerlemesi: coin toplama
+  user.tasks["collect_coins"] = user.tasks["collect_coins"] || { progress: 0, completed: false, claimed: false };
+  if (!user.tasks["collect_coins"].completed) {
+    user.tasks["collect_coins"].progress += coinGain;
+    let tasksList = JSON.parse(fs.readFileSync(TASKS_FILE, "utf-8"));
+    let tsk = tasksList.find(t => t.id === "collect_coins");
+    if (user.tasks["collect_coins"].progress >= tsk.target) user.tasks["collect_coins"].completed = true;
+  }
+
   users = users.map(u => (u.id === userId ? user : u));
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
 
@@ -81,6 +101,8 @@ app.post("/api/arena", (req, res) => {
 
   user.xp += xpGain;
   user.coins = (user.coins || 0) + coinGain;
+
+  // (Buraya arena görevleri eklenebilir)
 
   users = users.map(u => (u.id === userId ? user : u));
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
@@ -126,8 +148,7 @@ app.post("/api/buy", (req, res) => {
   });
 });
 
-// --- PAZAR (BAZAAR) MODÜLÜ --- //
-// Pazar listele
+// --- PAZAR (BAZAAR) MODÜLÜ ---
 app.get('/api/bazaar', (req, res) => {
   let items = [];
   if (fs.existsSync(BAZAAR_FILE)) {
@@ -136,7 +157,6 @@ app.get('/api/bazaar', (req, res) => {
   res.json(items);
 });
 
-// Eşya pazara koy
 app.post('/api/bazaar', (req, res) => {
   const { userId, itemId, price } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -161,7 +181,6 @@ app.post('/api/bazaar', (req, res) => {
     price: Number(price)
   });
 
-  // Güncelle
   users = users.map(u => (u.id === userId ? user : u));
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
   fs.writeFileSync(BAZAAR_FILE, JSON.stringify(bazaar, null, 2), "utf-8");
@@ -169,7 +188,6 @@ app.post('/api/bazaar', (req, res) => {
   res.json({ message: "Eşya pazara eklendi!" });
 });
 
-// Pazardan satın al
 app.post('/api/buy-bazaar', (req, res) => {
   const { userId, bazaarId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -196,7 +214,6 @@ app.post('/api/buy-bazaar', (req, res) => {
   // Pazardan sil
   bazaar = bazaar.filter(b => b.id !== bazaarId);
 
-  // Dosyalara yaz
   users = users.map(u => {
     if (u.id === buyer.id) return buyer;
     if (u.id === seller.id) return seller;
@@ -209,7 +226,6 @@ app.post('/api/buy-bazaar', (req, res) => {
 });
 
 // --- HAZİNE SANDIĞI (CHEST) MODÜLÜ --- //
-// SANDIK DURUMU
 app.get('/api/chest-status/:userId', (req, res) => {
   const { userId } = req.params;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -237,7 +253,6 @@ app.get('/api/chest-status/:userId', (req, res) => {
   });
 });
 
-// SANDIĞI TOPLA
 app.post('/api/chest-claim', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -256,6 +271,16 @@ app.post('/api/chest-claim', (req, res) => {
   user.coins = (user.coins || 0) + earned;
   user.chest = { lastClaim: now, boostExpire: boostExpire };
 
+  // Görev ilerlemesi: coin toplama
+  user.tasks = user.tasks || {};
+  user.tasks["collect_coins"] = user.tasks["collect_coins"] || { progress: 0, completed: false, claimed: false };
+  if (!user.tasks["collect_coins"].completed) {
+    user.tasks["collect_coins"].progress += earned;
+    let tasksList = JSON.parse(fs.readFileSync(TASKS_FILE, "utf-8"));
+    let tsk = tasksList.find(t => t.id === "collect_coins");
+    if (user.tasks["collect_coins"].progress >= tsk.target) user.tasks["collect_coins"].completed = true;
+  }
+
   users = users.map(u => (u.id === userId ? user : u));
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
 
@@ -265,7 +290,6 @@ app.post('/api/chest-claim', (req, res) => {
   });
 });
 
-// BOOST SATIN AL (30 GÜN BOYUNCA AKTİF)
 app.post('/api/chest-boost', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -283,13 +307,55 @@ app.post('/api/chest-boost', (req, res) => {
   res.json({ message: "Boost aktif! 30 gün boyunca sandık hızlı dolacak." });
 });
 
-// Liderlik tablosu (en çok XP'ye sahip 20 oyuncu)
+// Liderlik tablosu (XP'ye göre)
 app.get('/api/leaderboard', (req, res) => {
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
-  users.sort((a, b) => b.xp - a.xp); // XP'ye göre sıralama
-  res.json(users.slice(0, 20)); // En iyi 20 oyuncu
+  users.sort((a, b) => b.xp - a.xp);
+  res.json(users.slice(0, 20));
 });
 
+// GÖREVLER MODÜLÜ
+app.get('/api/tasks/:userId', (req, res) => {
+  const { userId } = req.params;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  let tasks = JSON.parse(fs.readFileSync(TASKS_FILE, "utf-8"));
+  user.tasks = user.tasks || {};
+
+  // Her görevin kullanıcıda bir ilerleme kaydı olsun
+  tasks.forEach(task => {
+    if (!user.tasks[task.id]) {
+      user.tasks[task.id] = { progress: 0, completed: false, claimed: false };
+    }
+  });
+
+  res.json({ tasks, progress: user.tasks });
+});
+
+app.post('/api/tasks/claim', (req, res) => {
+  const { userId, taskId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  let tasks = JSON.parse(fs.readFileSync(TASKS_FILE, "utf-8"));
+  user.tasks = user.tasks || {};
+
+  let task = tasks.find(t => t.id === taskId);
+  if (!task) return res.status(404).json({ error: "Görev bulunamadı!" });
+
+  if (!user.tasks[taskId] || !user.tasks[taskId].completed || user.tasks[taskId].claimed) {
+    return res.status(400).json({ error: "Görev tamamlanmamış veya ödül alınmış!" });
+  }
+
+  // Ödül ver (ör: coin/xp)
+  if (task.rewardType === "coin") user.coins += task.reward;
+  if (task.rewardType === "xp") user.xp += task.reward;
+  user.tasks[taskId].claimed = true;
+
+  users = users.map(u => u.id === userId ? user : u);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+
+  res.json({ message: "Ödül alındı!", coin: user.coins, xp: user.xp });
+});
 
 // Sunucu başlat
 const PORT = process.env.PORT || 3000;
