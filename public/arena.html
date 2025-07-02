@@ -2,42 +2,40 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>KAISSAVA - Arena (2v2)</title>
+  <title>Kaissava - Arena</title>
   <style>
-    body { background: #212832; color: #ffcc00; font-family: 'Segoe UI', sans-serif; }
-    .arena-container { display: flex; flex-direction: column; align-items: center; margin-top: 60px;}
-    .arena-btn { background: #2563eb; color: #fff; border: none; padding: 22px 60px; border-radius: 16px; font-size: 1.5em; margin: 16px; cursor: pointer; transition:.2s;}
-    .arena-btn:hover { background: #1e40af; transform: scale(1.07);}
-    .arena-result { margin-top: 24px; font-size: 1.2em; color: #fbbf24;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 35px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif; }
+    .container { display: flex; flex-direction: column; align-items: center; margin-top: 70px; }
+    .arena-btn { background: #ffcc00; border: none; padding: 25px 70px; border-radius: 18px; font-size: 1.7em; margin: 16px; transition: .2s; cursor: pointer;}
+    .arena-btn:hover { background: #fff200; transform: scale(1.07);}
+    .result { margin-top: 30px; font-size: 1.3em; color: #88ff88;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 40px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
-  <div class="arena-container">
-    <h1>Arena 2v2</h1>
-    <button class="arena-btn" onclick="startArena()">Takımını Kur & Savaşa Başla</button>
-    <div id="arenaResult" class="arena-result"></div>
-    <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+  <div class="container">
+    <h1>Kaissava Arena</h1>
+    <button class="arena-btn" onclick="startArena()">2v2 Takım Savaşı</button>
+    <div id="arenaResult" class="result"></div>
+    <button class="back-btn" onclick="location.href='index.html'">Geri Dön</button>
   </div>
   <script>
+    let userId = localStorage.getItem("kaissava_userid") || null;
+    if (!userId) {
+      window.location.href = "register.html";
+    }
     function startArena() {
       fetch('/api/arena', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ userId: "sozer" })
+        body: JSON.stringify({ userId })
       })
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          document.getElementById('arenaResult').innerText = "Hata: " + data.error;
-        } else {
-          document.getElementById('arenaResult').innerText =
-            `Takımın: ${data.team.map(t => t.name).join(', ')}\n` +
-            `Rakip Takım: ${data.rivals.map(t => t.name).join(', ')}\n` +
-            `Sonuç: ${data.result}\n` +
-            `XP: ${data.xp}, Coin: ${data.coins}`;
-        }
+        if(data.error) return document.getElementById('arenaResult').innerText = "Hata: " + data.error;
+        document.getElementById('arenaResult').innerText =
+          `Takım arkadaşın: ${data.team[1].name} | Rakipler: ${data.rivals[0].name}, ${data.rivals[1].name}\nSonuç: ${data.result}\nKazandığın XP: ${data.xp} | Coin: ${data.coins}`;
       });
     }
   </script>
