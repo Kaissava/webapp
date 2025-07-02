@@ -60,6 +60,8 @@
         if (d.error) {
           document.getElementById('result').innerHTML = "<span style='color:#ff6060'>" + d.error + "</span>";
         } else {
+          // Kullanıcı kayıt olduysa, artık ana ekranda kayıt butonu gözükmeyecek!
+          localStorage.setItem("kaissava_userid", userId);
           document.getElementById('result').innerHTML = d.message + "<br>Artık giriş yapabilirsin!";
         }
       });
