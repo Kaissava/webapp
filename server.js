@@ -442,7 +442,10 @@ app.post('/api/tasks/claim', (req, res) => {
   res.json({ message: "Ödül alındı!", coin: user.coins, xp: user.xp });
 });
 
-// Günlük ödül kontrolü
+// 24 saatlik ms sabiti zaten yukarıda olmalı:
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+// Günlük ödül kontrolü (her zaman doğru hesaplama!)
 app.get("/api/daily/:userId", (req, res) => {
   const { userId } = req.params;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -450,12 +453,13 @@ app.get("/api/daily/:userId", (req, res) => {
   if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
 
   const now = Date.now();
-  const last = user.dailyReward || 0;
-  let canClaim = now - last > MS_PER_DAY;
+  const last = typeof user.dailyReward === "number" ? user.dailyReward : 0;
+  let canClaim = (now - last) >= MS_PER_DAY || last === 0;
+  let timeLeft = canClaim ? 0 : (MS_PER_DAY - (now - last));
 
   res.json({
     canClaim,
-    timeLeft: canClaim ? 0 : (MS_PER_DAY - (now - last))
+    timeLeft
   });
 });
 
@@ -467,9 +471,9 @@ app.post("/api/daily", (req, res) => {
   if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
 
   const now = Date.now();
-  const last = user.dailyReward || 0;
-  if (now - last < MS_PER_DAY) {
-    return res.status(400).json({ error: "Daha önce ödül toplandı! Bekle." });
+  const last = typeof user.dailyReward === "number" ? user.dailyReward : 0;
+  if ((now - last) < MS_PER_DAY && last !== 0) {
+    return res.status(400).json({ error: "Daha önce ödül toplandı! Yarın tekrar dene." });
   }
   // ÖDÜL: 25 coin + 15 xp
   user.coins = (user.coins || 0) + 25;
@@ -481,6 +485,7 @@ app.post("/api/daily", (req, res) => {
 
   res.json({ message: "Günlük ödülünü aldın! 25 coin + 15 xp kazandın." });
 });
+
 
 
 // Sunucu başlat
