@@ -6,19 +6,23 @@
     "power": 90,
     "level": 5,
     "coins": 200,
-    "inventory": ["sword", "armor"],
-    "referrals": 0,
-    "chestBoost": 0
+    "inventory": [],
+    "referrals": 2,
+    "chestBoost": 10,
+    "chest": {},
+    "tasks": {}
   },
   {
     "id": "rakip",
     "name": "Rakip",
-    "xp": 300,
-    "power": 85,
-    "level": 5,
-    "coins": 180,
-    "inventory": ["boots", "potion"],
+    "xp": 120,
+    "power": 50,
+    "level": 2,
+    "coins": 60,
+    "inventory": [],
     "referrals": 0,
-    "chestBoost": 0
+    "chestBoost": 0,
+    "chest": {},
+    "tasks": {}
   }
 ]
