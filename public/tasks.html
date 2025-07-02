@@ -1,67 +1,57 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>KAISSAVA - Görevler</title>
   <style>
-    body { background: #21222d; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 480px; margin: 50px auto; background: #1a1c22; padding: 36px 28px; border-radius: 16px; box-shadow: 0 4px 20px #0006;}
-    h1 { text-align: center; margin-bottom: 28px;}
-    .task { background: #27293a; color: #fff6c0; border-radius: 9px; padding: 16px 14px; margin-bottom: 19px;}
-    .task.done { background: #1a4e27; color: #bbffd3;}
-    .progress { font-size: 1.01em; margin-bottom: 7px;}
-    .claim-btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 7px 19px; font-size: 1em; cursor: pointer; transition: .13s;}
-    .claim-btn:hover { background: #1e40af;}
-    .claimed { color: #56ff78; font-weight: bold;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 24px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 540px; margin: 44px auto; background: #1a1c22; padding: 34px 36px; border-radius: 18px; box-shadow: 0 4px 22px #0003;}
+    h1 { text-align: center; margin-bottom: 26px;}
+    .task { background: #262b34; margin-bottom: 18px; padding: 14px 17px; border-radius: 8px;}
+    .title { font-weight: bold; color: #ffd700; }
+    .progress { margin-top: 8px; }
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 4px 15px; cursor: pointer; margin-left: 8px;}
+    .btn:disabled { background: #4b5563; cursor: not-allowed;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 28px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Görevler</h1>
-    <div id="taskList"></div>
+    <div id="tasksBox"></div>
     <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
-    let userId = "sozer"; // Test için sabit
-
+    let userId = "sozer"; // Değişebilir
     function loadTasks() {
-      fetch(`/api/tasks/${userId}`)
+      fetch("/api/tasks/" + userId)
         .then(res => res.json())
         .then(data => {
-          let html = '';
+          let html = "";
           data.tasks.forEach(task => {
-            let p = data.progress[task.id] || { progress: 0, completed: false, claimed: false };
-            let done = p.completed ? "done" : "";
-            html += `<div class="task ${done}">
-              <div><b>${task.title}</b></div>
+            let prog = data.progress[task.id] || {progress: 0, completed: false, claimed: false};
+            html += `<div class="task">
+              <div class="title">${task.title}</div>
               <div>${task.desc}</div>
-              <div class="progress">İlerleme: ${p.progress}/${task.target}</div>`;
-            if(p.completed && !p.claimed) {
-              html += `<button class="claim-btn" onclick="claimReward('${task.id}')">Ödülü Al (+${task.reward} ${task.rewardType})</button>`;
-            } else if(p.claimed) {
-              html += `<div class="claimed">Ödül alındı ✓</div>`;
-            }
-            html += `</div>`;
+              <div class="progress">Durum: ${prog.progress}/${task.target} &nbsp; 
+              ${prog.completed ? (prog.claimed ? '<span style="color:#90ee90;">Ödül Alındı</span>' : `<button class="btn" onclick="claimTask('${task.id}')">Ödül Al</button>`) : '<span style="color:#aaa;">Devam</span>'}
+              </div>
+            </div>`;
           });
-          document.getElementById('taskList').innerHTML = html;
+          document.getElementById('tasksBox').innerHTML = html;
         });
     }
-
-    function claimReward(taskId) {
+    function claimTask(taskId) {
       fetch('/api/tasks/claim', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ userId, taskId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        alert(data.message || data.error);
+      }).then(r=>r.json()).then(d=>{
+        alert(d.message || d.error);
         loadTasks();
       });
     }
-
     loadTasks();
   </script>
 </body>
