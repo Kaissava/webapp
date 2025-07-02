@@ -57,9 +57,15 @@
     <a href="leaderboard.html" class="btn">🏆 Lig Tablosu</a>
     <a href="tasks.html" class="btn">📋 Görevler</a>
     <a href="refer.html" class="btn">🎉 Referans/Davet</a>
-    <a href="register.html" class="btn">🆕 Kayıt Ol</a>
-
-
+    <a href="register.html" class="btn" id="registerBtn">🆕 Kayıt Ol</a>
   </div>
+
+  <script>
+    // Eğer kullanıcı zaten kayıt olduysa, "Kayıt Ol" butonunu gizle
+    if (localStorage.getItem("kaissava_userid")) {
+      var regBtn = document.getElementById("registerBtn");
+      if (regBtn) regBtn.style.display = "none";
+    }
+  </script>
 </body>
 </html>
