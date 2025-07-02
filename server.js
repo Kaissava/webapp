@@ -442,6 +442,47 @@ app.post('/api/tasks/claim', (req, res) => {
   res.json({ message: "Ödül alındı!", coin: user.coins, xp: user.xp });
 });
 
+// Günlük ödül kontrolü
+app.get("/api/daily/:userId", (req, res) => {
+  const { userId } = req.params;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  const now = Date.now();
+  const last = user.dailyReward || 0;
+  let canClaim = now - last > MS_PER_DAY;
+
+  res.json({
+    canClaim,
+    timeLeft: canClaim ? 0 : (MS_PER_DAY - (now - last))
+  });
+});
+
+// Günlük ödül toplama
+app.post("/api/daily", (req, res) => {
+  const { userId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+
+  const now = Date.now();
+  const last = user.dailyReward || 0;
+  if (now - last < MS_PER_DAY) {
+    return res.status(400).json({ error: "Daha önce ödül toplandı! Bekle." });
+  }
+  // ÖDÜL: 25 coin + 15 xp
+  user.coins = (user.coins || 0) + 25;
+  user.xp = (user.xp || 0) + 15;
+  user.dailyReward = now;
+
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+
+  res.json({ message: "Günlük ödülünü aldın! 25 coin + 15 xp kazandın." });
+});
+
+
 // Sunucu başlat
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
