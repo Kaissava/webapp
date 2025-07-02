@@ -442,9 +442,6 @@ app.post('/api/tasks/claim', (req, res) => {
   res.json({ message: "Ödül alındı!", coin: user.coins, xp: user.xp });
 });
 
-// 24 saatlik ms sabiti zaten yukarıda olmalı:
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
 // Günlük ödül kontrolü (her zaman doğru hesaplama!)
 app.get("/api/daily/:userId", (req, res) => {
   const { userId } = req.params;
