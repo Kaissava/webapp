@@ -1,18 +1,26 @@
 [
   {
     "id": "win_pvp",
-    "title": "3 PvP Maçı Kazan",
-    "desc": "3 adet PvP savaşını kazan.",
+    "title": "3 kez PvP Savaşı Kazan",
+    "desc": "3 PvP mücadelesi kazanırsan 100 coin alırsın.",
     "target": 3,
-    "rewardType": "coin",
-    "reward": 50
+    "reward": 100,
+    "rewardType": "coin"
   },
   {
     "id": "collect_coins",
-    "title": "50 Coin Topla",
-    "desc": "Oyun oynayarak toplam 50 coin biriktir.",
-    "target": 50,
-    "rewardType": "xp",
-    "reward": 80
+    "title": "100 Coin Topla",
+    "desc": "Toplamda 100 coin toplarsan 50 xp alırsın.",
+    "target": 100,
+    "reward": 50,
+    "rewardType": "xp"
+  },
+  {
+    "id": "equip_any",
+    "title": "Bir Ekipman Kuşan",
+    "desc": "Bir ekipman kuşandığında 30 coin al.",
+    "target": 1,
+    "reward": 30,
+    "rewardType": "coin"
   }
 ]
