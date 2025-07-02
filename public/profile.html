@@ -32,7 +32,8 @@
     <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
-    let userId = "sozer"; // Girişte otomatik veya queryden çekilebilir
+    let userId = localStorage.getItem("kaissava_userid") || null;
+    if (!userId) { window.location.href = "register.html"; }
 
     let marketData = {};
 
@@ -43,7 +44,6 @@
           fetch("/api/market").then(r=>r.json()).then(market => {
             marketData = {};
             market.forEach(i => marketData[i.id] = i);
-            // Ekipmanlar
             let eq = user.equipped || {};
             let eqRows = '';
             let totalPower = user.power;
@@ -61,12 +61,11 @@
               }
             });
 
-            document.getElementById('statsBox').innerHTML = 
+            document.getElementById('statsBox').innerHTML =
               `<b>Ad:</b> ${user.name}<br><b>Seviye:</b> ${user.level}<br><b>XP:</b> ${user.xp}<br><b>Güç:</b> ${totalPower} <span style="font-size:0.85em;color:#aaa;">(Ana güç: ${user.power}${extraStr})</span><br><b>Coin:</b> ${user.coins}`;
 
             document.getElementById('equippedList').innerHTML = eqRows;
 
-            // Envanter
             let invRows = '';
             (user.inventory || []).forEach(invId => {
               let item = marketData[invId];
@@ -79,7 +78,6 @@
           });
         });
     }
-
     function equip(itemId) {
       fetch('/api/equip', {
         method: "POST",
@@ -100,7 +98,6 @@
         loadProfile();
       });
     }
-
     loadProfile();
   </script>
 </body>
