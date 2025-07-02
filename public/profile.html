@@ -1,67 +1,107 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>KAISSAVA - Profilim</title>
+  <meta charset="UTF-8" />
+  <title>KAISSAVA - Profil</title>
   <style>
-    body { background: #181b24; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 430px; margin: 50px auto; background: #1a1c22; padding: 32px 28px; border-radius: 16px; box-shadow: 0 4px 24px #0004;}
-    h1 { text-align: center; margin-bottom: 28px;}
-    .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.11em;}
-    .inv { margin-top: 24px;}
-    .item { background: #21222b; color: #fff8c6; border-radius: 8px; padding: 6px 12px; margin-bottom: 7px;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 560px; margin: 44px auto; background: #1a1c22; padding: 34px 36px; border-radius: 18px; box-shadow: 0 4px 22px #0003;}
+    h1 { text-align: center; margin-bottom: 26px;}
+    .stats, .equipped, .inventory { margin-bottom: 20px; }
+    .eq-box, .inv-box { padding: 10px; background: #262b34; border-radius: 8px; margin-bottom: 12px; }
+    .eq-title { font-weight: bold; color: #ffd700; }
+    .item-row { display: flex; align-items: center; justify-content: space-between; margin: 6px 0;}
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 5px 17px; cursor: pointer; margin-left: 8px;}
+    .btn:hover { background: #1e40af; }
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 24px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Profilim</h1>
-    <div class="row"><b>Ad:</b> <span id="profileName"></span></div>
-    <div class="row"><b>Seviye:</b> <span id="profileLevel"></span></div>
-    <div class="row"><b>XP:</b> <span id="profileXP"></span></div>
-    <div class="row"><b>Coin:</b> <span id="profileCoins"></span></div>
-    <div class="row"><b>Güç:</b> <span id="profilePower"></span></div>
-    <div class="inv"><b>Envanter:</b>
-      <div id="profileInventory"></div>
+    <h1>Karakter Profili</h1>
+    <div class="stats" id="statsBox"></div>
+    <div class="equipped eq-box">
+      <div class="eq-title">Takılı Ekipmanlar</div>
+      <div id="equippedList"></div>
+    </div>
+    <div class="inventory inv-box">
+      <div class="eq-title">Envanter</div>
+      <div id="inventoryList"></div>
     </div>
     <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
-    let userId = "sozer"; // Giriş yapan oyuncunun id'si (ileride dinamik olur)
-    let itemsMeta = {};
+    let userId = "sozer"; // Girişte otomatik veya queryden çekilebilir
 
-    function loadItemsMeta(callback) {
-      fetch('/api/market')
-        .then(res => res.json())
-        .then(list => {
-          list.forEach(item => itemsMeta[item.id] = item.name);
-          if (callback) callback();
-        });
-    }
+    let marketData = {};
 
     function loadProfile() {
-      fetch(`/api/user/${userId}`)
+      fetch("/api/user/" + userId)
         .then(res => res.json())
         .then(user => {
-          document.getElementById('profileName').innerText = user.name;
-          document.getElementById('profileLevel').innerText = user.level;
-          document.getElementById('profileXP').innerText = user.xp;
-          document.getElementById('profileCoins').innerText = user.coins;
-          document.getElementById('profilePower').innerText = user.power;
-          let inv = "";
-          if(user.inventory && user.inventory.length > 0) {
-            user.inventory.forEach(i => {
-              inv += `<div class="item">${itemsMeta[i] || i}</div>`;
+          fetch("/api/market").then(r=>r.json()).then(market => {
+            marketData = {};
+            market.forEach(i => marketData[i.id] = i);
+            // Ekipmanlar
+            let eq = user.equipped || {};
+            let eqRows = '';
+            let totalPower = user.power;
+            let extraStr = "";
+
+            ['weapon','armor','gloves'].forEach(type => {
+              let eqId = eq[type];
+              if (eqId) {
+                let item = marketData[eqId];
+                totalPower += item.power;
+                eqRows += `<div class="item-row">${item.name} (+${item.power} güç) <button class="btn" onclick="unequip('${type}')">Çıkar</button></div>`;
+                extraStr += ` +${item.power} (${item.name})`;
+              } else {
+                eqRows += `<div class="item-row">${type.toUpperCase()}: Takılı ekipman yok</div>`;
+              }
             });
-          } else {
-            inv = "<i>Envanter boş</i>";
-          }
-          document.getElementById('profileInventory').innerHTML = inv;
+
+            document.getElementById('statsBox').innerHTML = 
+              `<b>Ad:</b> ${user.name}<br><b>Seviye:</b> ${user.level}<br><b>XP:</b> ${user.xp}<br><b>Güç:</b> ${totalPower} <span style="font-size:0.85em;color:#aaa;">(Ana güç: ${user.power}${extraStr})</span><br><b>Coin:</b> ${user.coins}`;
+
+            document.getElementById('equippedList').innerHTML = eqRows;
+
+            // Envanter
+            let invRows = '';
+            (user.inventory || []).forEach(invId => {
+              let item = marketData[invId];
+              if (item) {
+                invRows += `<div class="item-row">${item.name} (+${item.power} güç) <button class="btn" onclick="equip('${invId}')">Kuşan</button></div>`;
+              }
+            });
+            if (!invRows) invRows = "Envanterde eşya yok.";
+            document.getElementById('inventoryList').innerHTML = invRows;
+          });
         });
     }
 
-    loadItemsMeta(loadProfile);
+    function equip(itemId) {
+      fetch('/api/equip', {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userId, itemId })
+      }).then(r=>r.json()).then(d=>{
+        alert(d.message || d.error);
+        loadProfile();
+      });
+    }
+    function unequip(type) {
+      fetch('/api/unequip', {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userId, type })
+      }).then(r=>r.json()).then(d=>{
+        alert(d.message || d.error);
+        loadProfile();
+      });
+    }
+
+    loadProfile();
   </script>
 </body>
 </html>
