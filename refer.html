@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Referans</title>
+  <style>
+    body { background: #181b24; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 420px; margin: 50px auto; background: #1a1c22; padding: 32px 28px; border-radius: 16px; box-shadow: 0 4px 24px #0004;}
+    h1 { text-align: center; margin-bottom: 24px;}
+    .info { margin-bottom: 20px; }
+    .ref-link { font-size: 1.02em; background: #222; padding: 9px 13px; border-radius: 9px; color: #ffe88e;}
+    .result { margin-top: 14px; min-height: 18px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 30px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Arkadaşını Davet Et</h1>
+    <div class="info">
+      Arkadaşını oyuna davet et, sandığın daha hızlı dolsun!<br>
+      Her davet için sandık dolumun <b>%5</b> artar.
+    </div>
+    <div class="ref-link" id="refLink"></div>
+    <div style="margin-top:14px;">Şu ana kadar <b id="refCount"></b> arkadaş davet ettin.<br>
+      Sandık dolum oranı: <b id="boostPercent"></b>
+    </div>
+    <hr style="margin: 25px 0; border: 0; border-top: 1px solid #444;">
+    <h3>Yeni Kullanıcı Kaydı (Demo)</h3>
+    <input type="text" id="newUserId" placeholder="Yeni kullanıcı ID" />
+    <input type="text" id="newUserName" placeholder="İsim" />
+    <button onclick="registerRef()">Davet ile Kayıt</button>
+    <div class="result" id="regResult"></div>
+    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+  </div>
+  <script>
+    let userId = "sozer"; // Senin kullanıcı id'n
+
+    // Referans linki oluştur (örnek)
+    document.getElementById("refLink").innerText =
+      "Senin davet linkin: https://oyunadresin.com/register?ref=" + userId;
+
+    // Kullanıcı verisi çek
+    fetch('/api/user/' + userId)
+      .then(res => res.json())
+      .then(u => {
+        document.getElementById('refCount').innerText = u.referrals || 0;
+        document.getElementById('boostPercent').innerText = "%" + (u.chestBoost || 0);
+      });
+
+    // Demo referans kayıt fonksiyonu
+    function registerRef() {
+      let newUserId = document.getElementById("newUserId").value.trim();
+      let newUserName = document.getElementById("newUserName").value.trim();
+      if(!newUserId || !newUserName) {
+        alert("Yeni kullanıcı adı ve ismi gir!");
+        return;
+      }
+      fetch('/api/register-ref', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newUserId, newName: newUserName, referrerId: userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("regResult").innerText = data.message || data.error;
+        location.reload();
+      });
+    }
+  </script>
+</body>
+</html>
