@@ -1,34 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Kaissava - Profil</title>
+  <title>KAISSAVA - Profilim</title>
   <style>
-    body { background: #212832; color: #ffcc00; font-family: 'Segoe UI', sans-serif; }
-    .profile-box { margin: 50px auto; padding: 40px; border-radius: 18px; background: #181b24; box-shadow: 0 4px 40px #111;}
-    .field { margin: 10px 0; font-size: 1.4em; }
-    .back-btn { margin-top: 40px; }
+    body { background: #181b24; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 430px; margin: 50px auto; background: #1a1c22; padding: 32px 28px; border-radius: 16px; box-shadow: 0 4px 24px #0004;}
+    h1 { text-align: center; margin-bottom: 28px;}
+    .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.11em;}
+    .inv { margin-top: 24px;}
+    .item { background: #21222b; color: #fff8c6; border-radius: 8px; padding: 6px 12px; margin-bottom: 7px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
-  <div class="profile-box" id="profile">
-    <div class="field">Adı: <span id="username"></span></div>
-    <div class="field">XP: <span id="xp"></span></div>
-    <div class="field">Güç: <span id="power"></span></div>
-    <div class="field">Seviye: <span id="level"></span></div>
-    <!-- Diğer alanlar -->
-    <button class="btn back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+  <div class="container">
+    <h1>Profilim</h1>
+    <div class="row"><b>Ad:</b> <span id="profileName"></span></div>
+    <div class="row"><b>Seviye:</b> <span id="profileLevel"></span></div>
+    <div class="row"><b>XP:</b> <span id="profileXP"></span></div>
+    <div class="row"><b>Coin:</b> <span id="profileCoins"></span></div>
+    <div class="row"><b>Güç:</b> <span id="profilePower"></span></div>
+    <div class="inv"><b>Envanter:</b>
+      <div id="profileInventory"></div>
+    </div>
+    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
   </div>
   <script>
-    // Test için statik user id veriyoruz (sonra login mekanizması ekleriz)
-    fetch('/api/user/sozer')
-      .then(r => r.json())
-      .then(user => {
-        document.getElementById('username').innerText = user.name;
-        document.getElementById('xp').innerText = user.xp;
-        document.getElementById('power').innerText = user.power;
-        document.getElementById('level').innerText = user.level;
-      });
+    let userId = "sozer"; // Giriş yapan oyuncunun id'si (ileride dinamik olur)
+    let itemsMeta = {};
+
+    function loadItemsMeta(callback) {
+      fetch('/api/market')
+        .then(res => res.json())
+        .then(list => {
+          list.forEach(item => itemsMeta[item.id] = item.name);
+          if (callback) callback();
+        });
+    }
+
+    function loadProfile() {
+      fetch(`/api/user/${userId}`)
+        .then(res => res.json())
+        .then(user => {
+          document.getElementById('profileName').innerText = user.name;
+          document.getElementById('profileLevel').innerText = user.level;
+          document.getElementById('profileXP').innerText = user.xp;
+          document.getElementById('profileCoins').innerText = user.coins;
+          document.getElementById('profilePower').innerText = user.power;
+          let inv = "";
+          if(user.inventory && user.inventory.length > 0) {
+            user.inventory.forEach(i => {
+              inv += `<div class="item">${itemsMeta[i] || i}</div>`;
+            });
+          } else {
+            inv = "<i>Envanter boş</i>";
+          }
+          document.getElementById('profileInventory').innerHTML = inv;
+        });
+    }
+
+    loadItemsMeta(loadProfile);
   </script>
 </body>
 </html>
