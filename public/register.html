@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>KAISSAVA - Kayıt Ol</title>
+  <style>
+    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 400px; margin: 60px auto; background: #1a1c22; padding: 32px 28px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 22px;}
+    .form-group { margin-bottom: 19px; }
+    label { display:block; font-weight: bold; margin-bottom:6px; }
+    input { width: 100%; padding: 7px 11px; border-radius: 7px; border: 1px solid #222; background: #2d3544; color: #ffd700;}
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 8px 22px; cursor: pointer; margin-top: 6px;}
+    .btn:hover { background: #1e40af; }
+    .result { margin-top: 18px; color: #90ee90; min-height: 26px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 24px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .back-btn:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Yeni Oyuncu Kaydı</h1>
+    <form id="registerForm" onsubmit="register(event)">
+      <div class="form-group">
+        <label for="userid">Oyuncu ID</label>
+        <input type="text" id="userid" required maxlength="16" />
+      </div>
+      <div class="form-group">
+        <label for="username">Oyuncu Adı</label>
+        <input type="text" id="username" required maxlength="20" />
+      </div>
+      <div class="form-group">
+        <label for="refcode">Referans Kodu (Varsa)</label>
+        <input type="text" id="refcode" maxlength="16" placeholder="(opsiyonel)" />
+      </div>
+      <button class="btn" type="submit">Kaydol</button>
+    </form>
+    <div class="result" id="result"></div>
+    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+  </div>
+  <script>
+    function register(e) {
+      e.preventDefault();
+      let userId = document.getElementById('userid').value.trim();
+      let username = document.getElementById('username').value.trim();
+      let ref = document.getElementById('refcode').value.trim();
+      if (!userId || !username) return alert("ID ve ad boş bırakılamaz!");
+
+      fetch('/api/register-ref', {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          newUserId: userId,
+          newName: username,
+          referrerId: ref || null
+        })
+      })
+      .then(r=>r.json())
+      .then(d=>{
+        if (d.error) {
+          document.getElementById('result').innerHTML = "<span style='color:#ff6060'>" + d.error + "</span>";
+        } else {
+          document.getElementById('result').innerHTML = d.message + "<br>Artık giriş yapabilirsin!";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
