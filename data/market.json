@@ -1,5 +1,7 @@
 [
-  { "id": "sword1", "name": "Demir Kılıç", "type": "weapon", "price": 40, "power": 10 },
-  { "id": "armor1", "name": "Çelik Zırh", "type": "armor", "price": 70, "power": 15 },
-  { "id": "glove1", "name": "Dayanıklı Eldiven", "type": "gloves", "price": 30, "power": 6 }
+  { "id": "sword",   "name": "Kılıç",       "price": 100, "slot": "weapon" },
+  { "id": "shield",  "name": "Kalkan",      "price": 120, "slot": "armor"  },
+  { "id": "helmet",  "name": "Miğfer",      "price": 80,  "slot": "helmet" },
+  { "id": "boots",   "name": "Bot",         "price": 60,  "slot": "boots"  },
+  { "id": "gloves",  "name": "Eldiven",     "price": 40,  "slot": "gloves" }
 ]
