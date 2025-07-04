@@ -1,42 +1,63 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <meta charset="UTF-8">
   <title>KAISSAVA - Hazine Sandığı</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { background: #23272f; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 400px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    body { background: #191c22; color: #fff; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 450px; margin: 60px auto; background: #181b24; padding: 38px; border-radius: 17px; box-shadow: 0 4px 28px #0003;}
     h1 { text-align: center; margin-bottom: 32px;}
-    .info { margin-bottom: 22px;}
-    .btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 8px 24px; font-size: 1em; cursor: pointer; transition: .18s;}
-    .btn:hover { background: #1e40af;}
-    .result { margin-top: 22px; color: #90ee90; min-height: 26px;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    .status { margin-bottom: 19px; }
+    .result { margin: 15px 0 13px 0; color: #fffc99; min-height: 26px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 24px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
+    .boost-btn { background: #ffb700; color: #333; border: none; border-radius: 10px; padding: 8px 16px; font-size: 1em; cursor: pointer; margin-left: 10px;}
+    .boost-btn:disabled { background: #bbb; color: #888; }
+    .claim-btn { background: #2563eb; color: #fff; border: none; border-radius: 10px; padding: 8px 16px; font-size: 1em; cursor: pointer;}
+    .claim-btn:disabled { background: #bbb; color: #888; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Hazine Sandığı</h1>
-    <div class="info" id="chestInfo"></div>
-    <button class="btn" onclick="claimChest()">Sandıktaki Coinleri Topla</button>
-    <button class="btn" onclick="boostChest()">30 Gün Boost Satın Al</button>
+    <div class="status" id="chestStatus">Yükleniyor...</div>
+    <button class="claim-btn" id="claimBtn" onclick="claimChest()" disabled>Sandıktakileri Topla</button>
+    <button class="boost-btn" id="boostBtn" onclick="boostChest()">30 Günlük Boost Satın Al</button>
     <div class="result" id="chestResult"></div>
-    <button class="back-btn" onclick="location.href='index.html'">Ana Ekran</button>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
   </div>
   <script>
-    let userId = localStorage.getItem("kaissava_userid") || null;
-    if (!userId) {
-      window.location.href = "register.html";
+    // Telegram WebApp kullanıcı
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    let userId = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      localStorage.setItem("kaissava_userid", userId);
+    } else {
+      userId = localStorage.getItem("kaissava_userid");
+    }
+
+    function msToTime(ms) {
+      if (!ms || ms < 0) return "0 saniye";
+      let seconds = Math.floor((ms / 1000) % 60);
+      let minutes = Math.floor((ms / (1000 * 60)) % 60);
+      let hours = Math.floor(ms / (1000 * 60 * 60));
+      let parts = [];
+      if (hours) parts.push(hours + " saat");
+      if (minutes) parts.push(minutes + " dakika");
+      if (seconds) parts.push(seconds + " saniye");
+      return parts.join(" ") || "0 saniye";
     }
     function loadChest() {
       fetch('/api/chest-status/' + userId)
         .then(res => res.json())
         .then(data => {
-          let info = `Biriken coin: <b>${data.coin}</b><br>
-                      Sandık boost: <b>${data.boosted ? 'Aktif' : 'Pasif'}</b>`;
-          document.getElementById('chestInfo').innerHTML = info;
+          document.getElementById('chestStatus').innerHTML =
+            `Sandıkta biriken coin: <b>${data.coin}</b> <br>
+            ${data.boosted ? "<b>Boost aktif!</b> (" + msToTime(data.boostLeft) + " kaldı)" : "Boost yok."}<br>
+            Sandığın tamamen dolmasına: <b>${msToTime(data.timeLeft)}</b>`;
+          document.getElementById('claimBtn').disabled = data.coin === 0;
         });
     }
     function claimChest() {
@@ -47,7 +68,8 @@
       })
       .then(res => res.json())
       .then(data => {
-        document.getElementById('chestResult').innerText = data.coin ? `${data.coin} coin topladın!` : (data.error || "Bir hata oluştu!");
+        document.getElementById('chestResult').innerText = data.coin > 0 ?
+          `Sandıktan ${data.coin} coin aldın!` : (data.error || "");
         loadChest();
       });
     }
