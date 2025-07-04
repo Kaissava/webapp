@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>KAISSAVA Ana Sayfa</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -17,33 +17,43 @@
       height: 100vh;
       margin: 0;
     }
-    h1 { font-size: 3rem; margin-bottom: 2rem; text-shadow: 0 0 8px #2563eb; }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 8px #2563eb;
+    }
     .menu-buttons {
       display: flex;
       gap: 1.5rem;
       flex-wrap: wrap;
       justify-content: center;
-      max-width: 600px;
+      max-width: 650px;
     }
     a.btn {
-      text-decoration: none;
       background: #2563eb;
       color: white;
+      text-decoration: none;
       padding: 1rem 2rem;
       font-size: 1.25rem;
       font-weight: 600;
       border-radius: 12px;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(37, 99, 235, 0.6);
-      transition: background 0.3s, transform 0.2s;
+      transition: background 0.3s ease, transform 0.2s ease;
       min-width: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      margin-bottom: 10px;
     }
-    a.btn:hover { background: #1e40af; transform: scale(1.05); }
+    a.btn:hover {
+      background: #1e40af;
+      transform: scale(1.05);
+      box-shadow: 0 6px 14px rgba(30, 64, 175, 0.8);
+    }
+    a.btn:active {
+      transform: scale(0.98);
+    }
   </style>
 </head>
 <body>
@@ -57,17 +67,30 @@
     <a href="profile.html" class="btn">👤 Profilim</a>
     <a href="leaderboard.html" class="btn">🏆 Lig Tablosu</a>
     <a href="tasks.html" class="btn">📋 Görevler</a>
-    <a href="daily.html" class="btn">🎁 Günlük Ödül</a>
     <a href="refer.html" class="btn">🎉 Referans/Davet</a>
-    <a href="register.html" class="btn" id="registerBtn">🆕 Kayıt Ol</a>
+    <a href="daily.html" class="btn">🎁 Günlük Ödül</a>
   </div>
-
   <script>
-    // Eğer kullanıcı zaten kayıt olduysa, "Kayıt Ol" butonunu gizle
-    if (localStorage.getItem("kaissava_userid")) {
-      var regBtn = document.getElementById("registerBtn");
-      if (regBtn) regBtn.style.display = "none";
+    // Telegram WebApp entegrasyonu: userId ve username otomatik!
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    let userId = null;
+    let username = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      username = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name || "Anonim";
+      localStorage.setItem("kaissava_userid", userId);
+      localStorage.setItem("kaissava_username", username);
+    } else {
+      // Sadece web test için!
+      userId = localStorage.getItem("kaissava_userid");
+      username = localStorage.getItem("kaissava_username");
+      if (!userId) {
+        userId = "webtest" + Math.floor(Math.random() * 100000);
+        localStorage.setItem("kaissava_userid", userId);
+        localStorage.setItem("kaissava_username", "WebTest");
+      }
     }
+    // Artık userId her sayfa için hazır!
   </script>
 </body>
 </html>
