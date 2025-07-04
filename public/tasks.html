@@ -1,56 +1,63 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>KAISSAVA - Görevler</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 540px; margin: 44px auto; background: #1a1c22; padding: 34px 36px; border-radius: 18px; box-shadow: 0 4px 22px #0003;}
-    h1 { text-align: center; margin-bottom: 26px;}
-    .task { background: #262b34; margin-bottom: 18px; padding: 14px 17px; border-radius: 8px;}
-    .title { font-weight: bold; color: #ffd700; }
-    .progress { margin-top: 8px; }
-    .btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 4px 15px; cursor: pointer; margin-left: 8px;}
-    .btn:disabled { background: #4b5563; cursor: not-allowed;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 28px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #181b24; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 470px; margin: 56px auto; background: #181b24; padding: 34px; border-radius: 16px; box-shadow: 0 4px 24px #0003;}
+    h1 { text-align: center; margin-bottom: 25px;}
+    .task-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #4445;}
+    .task-complete { color: #90ee90;}
+    .claim-btn { background: #2563eb; color: #fff; border: none; border-radius: 7px; padding: 5px 14px; font-size: .97em; cursor: pointer; margin-left: 7px;}
+    .claim-btn:disabled { background: #888;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 30px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Görevler</h1>
-    <div id="tasksBox"></div>
-    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+    <div id="tasksList"></div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
   </div>
   <script>
-    let userId = localStorage.getItem("kaissava_userid") || null;
-    if (!userId) { window.location.href = "register.html"; }
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    let userId = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      localStorage.setItem("kaissava_userid", userId);
+    } else {
+      userId = localStorage.getItem("kaissava_userid");
+    }
     function loadTasks() {
-      fetch("/api/tasks/" + userId)
+      fetch('/api/tasks?userId=' + userId)
         .then(res => res.json())
-        .then(data => {
-          let html = "";
-          data.tasks.forEach(task => {
-            let prog = data.progress[task.id] || {progress: 0, completed: false, claimed: false};
-            html += `<div class="task">
-              <div class="title">${task.title}</div>
-              <div>${task.desc}</div>
-              <div class="progress">Durum: ${prog.progress}/${task.target} &nbsp; 
-              ${prog.completed ? (prog.claimed ? '<span style="color:#90ee90;">Ödül Alındı</span>' : `<button class="btn" onclick="claimTask('${task.id}')">Ödül Al</button>`) : '<span style="color:#aaa;">Devam</span>'}
-              </div>
+        .then(tasks => {
+          let html = '';
+          tasks.forEach(task => {
+            html += `<div class="task-row${task.completed ? ' task-complete' : ''}">
+              <span>${task.title} ${task.completed ? '(Tamamlandı)' : ''}</span>
+              <span>
+                ${task.completed && !task.claimed ? 
+                  `<button class="claim-btn" onclick="claimTask('${task.id}')">Ödülü Al</button>`
+                  : task.claimed ? 'Ödül Alındı' : ''
+                }
+              </span>
             </div>`;
           });
-          document.getElementById('tasksBox').innerHTML = html;
+          document.getElementById('tasksList').innerHTML = html;
         });
     }
     function claimTask(taskId) {
-      fetch('/api/tasks/claim', {
-        method: "POST",
-        headers: {'Content-Type':'application/json'},
+      fetch('/api/claim', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ userId, taskId })
-      }).then(r=>r.json()).then(d=>{
-        alert(d.message || d.error);
+      })
+      .then(res => res.json())
+      .then(data => {
         loadTasks();
       });
     }
