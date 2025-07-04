@@ -1,72 +1,103 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Pazarda Ekipman Sat</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta charset="UTF-8" />
-  <title>KAISSAVA - Pazarda Satış Yap</title>
   <style>
-    body { background: #23272f; color: #ffcc00; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 450px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
-    h1 { text-align: center; margin-bottom: 32px;}
-    .item-list { margin-bottom: 26px;}
-    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .item-name { font-size: 1.1em; }
-    .sell-btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 8px 24px; font-size: 1em; cursor: pointer; transition: .18s;}
-    .sell-btn:hover { background: #1e40af;}
+    body { background: #191c22; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 430px; margin: 60px auto; background: #181b24; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 30px;}
+    .inv-list { margin-bottom: 22px;}
+    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
+    .item-name { font-size: 1.07em; }
+    .sell-btn { background: #ffb700; color: #333; border: none; border-radius: 9px; padding: 8px 18px; font-size: 1em; cursor: pointer; transition: .18s;}
+    .sell-btn:hover { background: #f7c900;}
+    .form-row { margin-bottom: 15px;}
     .result { margin-top: 22px; color: #90ee90; min-height: 26px;}
     .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
-    input[type="number"] { width: 75px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Pazarda Satış Yap</h1>
-    <div class="item-list" id="inventoryList"></div>
+    <h1>Pazarda Ekipman Sat</h1>
+    <div class="inv-list" id="inventoryList"></div>
+    <div class="form-row" id="sellForm"></div>
     <div class="result" id="bazaarResult"></div>
-    <button class="back-btn" onclick="window.location.href='bazaar_menu.html'">Pazar Menüsü</button>
+    <button class="back-btn" onclick="location.href='bazaar_menu.html'">Pazar Ana Menü</button>
   </div>
   <script>
-    let userId = localStorage.getItem("kaissava_userid") || null;
-    if (!userId) { window.location.href = "register.html"; }
+    // Telegram WebApp entegrasyonu:
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    let userId = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      localStorage.setItem("kaissava_userid", userId);
+    } else {
+      userId = localStorage.getItem("kaissava_userid");
+    }
 
-    let marketData = {};
+    let selectedItem = null;
+
     function loadInventory() {
-      fetch("/api/user/" + userId)
+      fetch('/api/user/' + userId)
         .then(res => res.json())
         .then(user => {
-          fetch("/api/market").then(r=>r.json()).then(market => {
-            marketData = {};
-            market.forEach(i => marketData[i.id] = i);
-            let invRows = '';
-            (user.inventory || []).forEach(invId => {
-              let item = marketData[invId];
-              if (item) {
-                invRows += `<div class="item">
-                  <span class="item-name">${item.name} (+${item.power} güç)</span>
-                  <input type="number" min="1" max="999" placeholder="Fiyat" id="price_${invId}" />
-                  <button class="sell-btn" onclick="sellItem('${invId}')">Pazara Ekle</button>
-                </div>`;
-              }
+          if (!user.inventory || user.inventory.length === 0) {
+            document.getElementById('inventoryList').innerHTML = '<div>Envanterinde satılacak ekipman yok.</div>';
+            document.getElementById('sellForm').innerHTML = '';
+            return;
+          }
+          // Varsayalım item listesi market.json'daki id ve isimlerle eşleşiyor:
+          fetch('/api/market')
+            .then(res => res.json())
+            .then(items => {
+              let html = '';
+              user.inventory.forEach(invId => {
+                const item = items.find(i => i.id === invId);
+                if (item) {
+                  html += `<div class="item">
+                    <span class="item-name">${item.name}</span>
+                    <button class="sell-btn" onclick="openSell('${item.id}', '${item.name}')">Pazara Ekle</button>
+                  </div>`;
+                }
+              });
+              document.getElementById('inventoryList').innerHTML = html;
             });
-            document.getElementById('inventoryList').innerHTML = invRows || "Envanterde satılacak eşya yok.";
-          });
         });
     }
-    function sellItem(itemId) {
-      let price = document.getElementById('price_'+itemId).value;
-      if (!price || price <= 0) return alert("Geçerli bir fiyat gir!");
+
+    function openSell(itemId, itemName) {
+      selectedItem = itemId;
+      document.getElementById('sellForm').innerHTML = `
+        <div>
+          <b>${itemName}</b> için fiyat belirle:
+          <input type="number" id="sellPrice" min="1" placeholder="Coin miktarı" style="width: 90px; margin-left:6px;">
+          <button class="sell-btn" onclick="sellItem()">Satışa Ekle</button>
+        </div>
+      `;
+    }
+
+    function sellItem() {
+      const price = parseInt(document.getElementById('sellPrice').value);
+      if (!selectedItem || isNaN(price) || price < 1) {
+        document.getElementById('bazaarResult').innerText = "Geçerli bir fiyat gir!";
+        return;
+      }
       fetch('/api/bazaar', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ userId, itemId, price: Number(price) })
+        body: JSON.stringify({ userId, itemId: selectedItem, price })
       })
       .then(res => res.json())
       .then(data => {
         document.getElementById('bazaarResult').innerText = data.message || data.error;
         loadInventory();
+        document.getElementById('sellForm').innerHTML = '';
       });
     }
+
     loadInventory();
   </script>
 </body>
