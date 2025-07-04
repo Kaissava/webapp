@@ -18,6 +18,20 @@ const MS_PER_30_DAYS = 30 * MS_PER_DAY;
 app.use(express.json());
 app.use(express.static("public"));
 
+// Ekipman + taban güç toplamı (her yerde bunu kullan)
+function calculateTotalPower(user, marketItems) {
+  let total = user.power || 10;
+  if (user.equipped) {
+    Object.values(user.equipped).forEach(eid => {
+      if (eid) {
+        let item = marketItems.find(i => i.id === eid);
+        if (item && item.power) total += item.power;
+      }
+    });
+  }
+  return total;
+}
+
 // Otomatik kullanıcı ekleme fonksiyonu
 function autoRegister(users, userId) {
   let user = users.find(u => u.id === userId);
@@ -43,15 +57,20 @@ function autoRegister(users, userId) {
   return user;
 }
 
-// Kullanıcı çekme (ID ile)
+// Kullanıcı çekme (ID ile) + totalPower
 app.get("/api/user/:id", (req, res) => {
   const userId = req.params.id;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
   let user = autoRegister(users, userId);
-  res.json(user);
+
+  // Market item'larını oku ve totalPower ekle
+  let marketItems = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let totalPower = calculateTotalPower(user, marketItems);
+  let userObj = { ...user, totalPower: totalPower };
+  res.json(userObj);
 });
 
-// PvP endpoint
+// PvP endpoint (güç totalPower ile)
 app.post("/api/pvp", (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -61,8 +80,9 @@ app.post("/api/pvp", (req, res) => {
   if (rivals.length === 0) return res.status(400).json({ error: "Hiç rakip yok!" });
   let opponent = rivals[Math.floor(Math.random() * rivals.length)];
 
-  let userScore = user.power + Math.random() * 20 + user.level;
-  let oppScore = opponent.power + Math.random() * 20 + opponent.level;
+  let marketItems = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let userScore = calculateTotalPower(user, marketItems) + Math.random() * 20 + user.level;
+  let oppScore = calculateTotalPower(opponent, marketItems) + Math.random() * 20 + opponent.level;
   let userWins = userScore >= oppScore;
   let xpGain = userWins ? 50 : 15;
   let coinGain = userWins ? 30 : 10;
@@ -80,7 +100,7 @@ app.post("/api/pvp", (req, res) => {
   });
 });
 
-// Arena endpoint
+// Arena endpoint (güç totalPower ile)
 app.post("/api/arena", (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -95,8 +115,9 @@ app.post("/api/arena", (req, res) => {
   let rival1 = rest[Math.floor(Math.random() * rest.length)];
   let rival2 = rest.filter(u => u.id !== rival1.id)[0];
 
-  let teamScore = user.power + teammate.power + Math.random() * 30;
-  let rivalScore = rival1.power + rival2.power + Math.random() * 30;
+  let marketItems = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let teamScore = calculateTotalPower(user, marketItems) + calculateTotalPower(teammate, marketItems) + Math.random() * 30;
+  let rivalScore = calculateTotalPower(rival1, marketItems) + calculateTotalPower(rival2, marketItems) + Math.random() * 30;
   let win = teamScore >= rivalScore;
   let xpGain = win ? 80 : 30;
   let coinGain = win ? 50 : 15;
@@ -143,7 +164,6 @@ app.post("/api/buy", (req, res) => {
 });
 
 // --- HAZİNE SANDIĞI (CHEST) ---
-// Sandık durumu
 app.get('/api/chest-status/:userId', (req, res) => {
   const { userId } = req.params;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -169,7 +189,6 @@ app.get('/api/chest-status/:userId', (req, res) => {
     boostLeft
   });
 });
-// Sandık topla
 app.post('/api/chest-claim', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -195,7 +214,6 @@ app.post('/api/chest-claim', (req, res) => {
     totalCoins: user.coins
   });
 });
-// Boost satın al (30 gün)
 app.post('/api/chest-boost', (req, res) => {
   const { userId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -282,16 +300,22 @@ app.post("/api/claim", (req, res) => {
   res.json({ message: "Görev ödülü alındı!" });
 });
 
-// Liderlik/Lig Tablosu
+// Liderlik/Lig Tablosu (XP'ye göre)
 app.get("/api/leaderboard", (req, res) => {
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
-  let top = users.sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 20);
+  let marketItems = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let top = users
+    .map(u => ({
+      ...u,
+      totalPower: calculateTotalPower(u, marketItems)
+    }))
+    .sort((a, b) => (b.xp || 0) - (a.xp || 0))
+    .slice(0, 20);
   res.json(top);
 });
 
 // Referans sistemi (basit)
 app.get("/api/referral/:id", (req, res) => {
-  // Basit: referans linki ve kaç referans sayısı
   const userId = req.params.id;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
   let user = autoRegister(users, userId);
@@ -299,7 +323,6 @@ app.get("/api/referral/:id", (req, res) => {
 });
 
 // --- PAZAR (Bazaar) ---
-// Satışa ekle
 app.post("/api/bazaar", (req, res) => {
   const { userId, itemId, price } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -312,13 +335,11 @@ app.post("/api/bazaar", (req, res) => {
   let item = items.find(i => i.id === itemId);
   if (!item) return res.status(404).json({ error: "Ürün bulunamadı!" });
 
-  // Pazara ekle
   let bazaar = [];
   if (fs.existsSync(BAZAAR_FILE)) bazaar = JSON.parse(fs.readFileSync(BAZAAR_FILE, "utf-8"));
   let bazaarId = Date.now().toString() + Math.floor(Math.random() * 10000);
   bazaar.push({ id: bazaarId, itemId, price, sellerId: userId, sellerName: user.name, name: item.name });
 
-  // Envanterden çıkar
   user.inventory = user.inventory.filter(i => i !== itemId);
 
   users = users.map(u => (u.id === userId ? user : u));
@@ -327,13 +348,11 @@ app.post("/api/bazaar", (req, res) => {
 
   res.json({ message: `${item.name} pazara eklendi!` });
 });
-// Pazardaki ürünler
 app.get("/api/bazaar", (req, res) => {
   let bazaar = [];
   if (fs.existsSync(BAZAAR_FILE)) bazaar = JSON.parse(fs.readFileSync(BAZAAR_FILE, "utf-8"));
   res.json(bazaar);
 });
-// Pazardan satın al
 app.post("/api/buy_bazaar", (req, res) => {
   const { userId, itemId } = req.body;
   let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -345,12 +364,10 @@ app.post("/api/buy_bazaar", (req, res) => {
   if (!offer) return res.status(404).json({ error: "Ürün bulunamadı!" });
   if (user.coins < offer.price) return res.status(400).json({ error: "Yetersiz coin!" });
 
-  // Envantere ekle
   user.inventory = user.inventory || [];
   user.inventory.push(offer.itemId);
   user.coins -= offer.price;
 
-  // Pazardan sil
   bazaar = bazaar.filter(x => x.id !== itemId);
 
   users = users.map(u => (u.id === userId ? user : u));
