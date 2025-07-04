@@ -9,25 +9,67 @@
       margin: 0;
       height: 100vh;
       background: url('background_arena.png') center/cover no-repeat;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       font-family: 'Segoe UI', sans-serif;
       color: #f9fafb;
+      overflow: hidden;
     }
+    /* --- Loading Screen --- */
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 999;
+      transition: opacity .6s;
+    }
+    #loading-screen.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .logo-img {
+      width: 140px;
+      filter: drop-shadow(0 0 20px #ffeeba99);
+      animation: floatLogo 2.5s infinite alternate;
+      margin-bottom: 16px;
+    }
+    @keyframes floatLogo { to { transform: translateY(-10px);} }
+    .loader {
+      border: 6px solid #444;
+      border-top: 6px solid #ffe85b;
+      border-radius: 50%;
+      width: 48px; height: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg);} }
+    .loading-text {
+      font-size: 1.1rem;
+      letter-spacing: .04em;
+    }
+
+    /* --- Main Menu --- */
+    .menu-container {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      opacity: 0;
+      transition: opacity .5s .2s;
+      width: 90%;
+      max-width: 360px;
+    }
+    .menu-container.show { opacity: 1; }
+
     .menu {
       background: rgba(0,0,0,0.6);
-      padding: 12px;
+      backdrop-filter: blur(4px);
+      padding: 16px;
       border-radius: 12px;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2,1fr);
       gap: 10px;
-      max-width: 320px;
-      width: 90%;
     }
     .btn {
-      background: rgba(255, 225, 75,0.9);
+      background: rgba(255,225,75,0.9);
       color: #181b24;
       border: none;
       border-radius: 8px;
@@ -39,48 +81,76 @@
       transition: transform .15s, background .2s;
     }
     .btn:hover {
-      background: rgba(255, 225, 75,1);
+      background: rgba(255,225,75,1);
       transform: translateY(-2px);
     }
     .group-title {
       grid-column: span 2;
-      text-align: left;
-      margin-top: 6px;
-      font-size: 0.9rem;
+      font-size: .85rem;
       color: #cdd6e4;
-      opacity: 0.8;
+      opacity: .7;
+      margin-top: 8px;
+      text-align: left;
     }
-    /* Sadece dar ekran (mobil/Telegram) için */
+    .footinfo {
+      margin-top: 12px;
+      text-align: center;
+      font-size: .9rem;
+      color: #ffe9;
+      opacity: .85;
+    }
+
     @media(max-width: 400px) {
+      .btn { font-size: .9rem; padding: 8px; }
       .menu { gap: 8px; }
-      .btn { font-size: 0.9rem; padding: 8px; }
     }
   </style>
 </head>
 <body>
-  <div class="menu">
-    <button class="btn" onclick="go('profile.html')">👤 Profilim</button>
+  <!-- Loading Overlay -->
+  <div id="loading-screen">
+    <img src="logo_kaissava.png" class="logo-img" alt="KAISSAVA Logo">
+    <div class="loader"></div>
+    <div class="loading-text">Arenalar hazırlanıyor...</div>
+  </div>
 
-    <div class="group-title">Savaş</div>
-    <button class="btn" onclick="go('pvp.html')">⚔️ PvP</button>
-    <button class="btn" onclick="go('arena.html')">🏟️ Arena</button>
+  <!-- Main Menu -->
+  <div class="menu-container" id="menu">
+    <div class="menu">
+      <button class="btn" onclick="go('profile.html')">👤 Profilim</button>
 
-    <div class="group-title">Al-Sat</div>
-    <button class="btn" onclick="go('market.html')">🛒 Market</button>
-    <button class="btn" onclick="go('bazaar_menu.html')">⚖️ Pazar</button>
+      <div class="group-title">Savaş</div>
+      <button class="btn" onclick="go('pvp.html')">⚔️ PvP</button>
+      <button class="btn" onclick="go('arena.html')">🏟️ Arena</button>
 
-    <div class="group-title">Kaynaklar</div>
-    <button class="btn" onclick="go('chest.html')">🎁 Sandık</button>
-    <button class="btn" onclick="go('tasks.html')">📋 Görevler</button>
+      <div class="group-title">Al-Sat</div>
+      <button class="btn" onclick="go('market.html')">🛒 Market</button>
+      <button class="btn" onclick="go('bazaar_menu.html')">⚖️ Pazar</button>
 
-    <div class="group-title">Ekstralar</div>
-    <button class="btn" onclick="go('leaderboard.html')">🏆 Lig</button>
-    <button class="btn" onclick="go('refer.html')">🎉 Davet</button>
+      <div class="group-title">Kaynaklar</div>
+      <button class="btn" onclick="go('chest.html')">🎁 Sandık</button>
+      <button class="btn" onclick="go('tasks.html')">📋 Görevler</button>
+
+      <div class="group-title">Ekstralar</div>
+      <button class="btn" onclick="go('leaderboard.html')">🏆 Lig</button>
+      <button class="btn" onclick="go('refer.html')">🎉 Davet</button>
+    </div>
+    <div class="footinfo">
+      🪐 Mistik arenalarda güçlen, savaş, zaferini paylaş!<br>
+      © 2025 KAISSAVA
+    </div>
   </div>
 
   <script>
+    // Loading → Menu
+    setTimeout(() => {
+      document.getElementById('loading-screen').classList.add('hide');
+      setTimeout(()=>{
+        document.getElementById('menu').classList.add('show');
+      }, 400);
+    }, 2600);
+
     function go(page) {
-      // user_id parametresi mevcut URL'den geçerli bir şekilde alınmalı
       const params = new URLSearchParams(window.location.search);
       const uid = params.get('user_id') || 'guest';
       window.location.href = `${page}?user_id=${uid}`;
