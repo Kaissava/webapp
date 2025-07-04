@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>KAISSAVA - Pazar</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 400px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
-    h1 { text-align: center; margin-bottom: 32px;}
-    .btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 16px 40px; font-size: 1.25em; margin: 22px 0; cursor: pointer; transition: .18s;}
+    body { background: #191c22; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 400px; margin: 60px auto; background: #1a1c22; padding: 36px; border-radius: 17px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 30px;}
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 10px; padding: 15px 22px; font-size: 1.16em; cursor: pointer; display:block; width:100%; margin-bottom:18px;}
     .btn:hover { background: #1e40af;}
     .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
@@ -16,10 +16,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>Pazar Menüsü</h1>
-    <button class="btn" onclick="window.location.href='bazaar_buy.html'">🛒 Pazardan Ekipman Al</button>
-    <button class="btn" onclick="window.location.href='bazaar_sell.html'">💰 Pazarda Satış Yap</button>
-    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+    <h1>Pazar Yeri</h1>
+    <button class="btn" onclick="location.href='bazaar_buy.html'">Pazardan Ekipman Al</button>
+    <button class="btn" onclick="location.href='bazaar_sell.html'">Pazarda Ekipman Sat</button>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
   </div>
 </body>
 </html>
