@@ -1,105 +1,45 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <meta charset="UTF-8">
+  <title>KAISSAVA - Profilim</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta charset="UTF-8" />
-  <title>KAISSAVA - Profil</title>
   <style>
-    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 560px; margin: 44px auto; background: #1a1c22; padding: 34px 36px; border-radius: 18px; box-shadow: 0 4px 22px #0003;}
-    h1 { text-align: center; margin-bottom: 26px;}
-    .stats, .equipped, .inventory { margin-bottom: 20px; }
-    .eq-box, .inv-box { padding: 10px; background: #262b34; border-radius: 8px; margin-bottom: 12px; }
-    .eq-title { font-weight: bold; color: #ffd700; }
-    .item-row { display: flex; align-items: center; justify-content: space-between; margin: 6px 0;}
-    .btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 5px 17px; cursor: pointer; margin-left: 8px;}
-    .btn:hover { background: #1e40af; }
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 24px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #1e2530; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 420px; margin: 60px auto; background: #171b24; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 32px;}
+    .info { margin-bottom: 18px;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Karakter Profili</h1>
-    <div class="stats" id="statsBox"></div>
-    <div class="equipped eq-box">
-      <div class="eq-title">Takılı Ekipmanlar</div>
-      <div id="equippedList"></div>
-    </div>
-    <div class="inventory inv-box">
-      <div class="eq-title">Envanter</div>
-      <div id="inventoryList"></div>
-    </div>
-    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+    <h1>Profilim</h1>
+    <div class="info" id="profileInfo">Yükleniyor...</div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
   </div>
   <script>
-    let userId = localStorage.getItem("kaissava_userid") || null;
-    if (!userId) { window.location.href = "register.html"; }
-
-    let marketData = {};
-
-    function loadProfile() {
-      fetch("/api/user/" + userId)
-        .then(res => res.json())
-        .then(user => {
-          fetch("/api/market").then(r=>r.json()).then(market => {
-            marketData = {};
-            market.forEach(i => marketData[i.id] = i);
-            let eq = user.equipped || {};
-            let eqRows = '';
-            let totalPower = user.power;
-            let extraStr = "";
-
-            ['weapon','armor','gloves'].forEach(type => {
-              let eqId = eq[type];
-              if (eqId) {
-                let item = marketData[eqId];
-                totalPower += item.power;
-                eqRows += `<div class="item-row">${item.name} (+${item.power} güç) <button class="btn" onclick="unequip('${type}')">Çıkar</button></div>`;
-                extraStr += ` +${item.power} (${item.name})`;
-              } else {
-                eqRows += `<div class="item-row">${type.toUpperCase()}: Takılı ekipman yok</div>`;
-              }
-            });
-
-            document.getElementById('statsBox').innerHTML =
-              `<b>Ad:</b> ${user.name}<br><b>Seviye:</b> ${user.level}<br><b>XP:</b> ${user.xp}<br><b>Güç:</b> ${totalPower} <span style="font-size:0.85em;color:#aaa;">(Ana güç: ${user.power}${extraStr})</span><br><b>Coin:</b> ${user.coins}`;
-
-            document.getElementById('equippedList').innerHTML = eqRows;
-
-            let invRows = '';
-            (user.inventory || []).forEach(invId => {
-              let item = marketData[invId];
-              if (item) {
-                invRows += `<div class="item-row">${item.name} (+${item.power} güç) <button class="btn" onclick="equip('${invId}')">Kuşan</button></div>`;
-              }
-            });
-            if (!invRows) invRows = "Envanterde eşya yok.";
-            document.getElementById('inventoryList').innerHTML = invRows;
-          });
-        });
+    // Telegram WebApp kullanıcı
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    let userId = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      localStorage.setItem("kaissava_userid", userId);
+    } else {
+      userId = localStorage.getItem("kaissava_userid");
     }
-    function equip(itemId) {
-      fetch('/api/equip', {
-        method: "POST",
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ userId, itemId })
-      }).then(r=>r.json()).then(d=>{
-        alert(d.message || d.error);
-        loadProfile();
+    fetch('/api/user/' + userId)
+      .then(res => res.json())
+      .then(user => {
+        document.getElementById('profileInfo').innerHTML = `
+          <b>${user.name}</b> <br>
+          Seviye: ${user.level}<br>
+          Güç: ${user.power}<br>
+          XP: ${user.xp}<br>
+          Coin: ${user.coins}
+        `;
       });
-    }
-    function unequip(type) {
-      fetch('/api/unequip', {
-        method: "POST",
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ userId, type })
-      }).then(r=>r.json()).then(d=>{
-        alert(d.message || d.error);
-        loadProfile();
-      });
-    }
-    loadProfile();
   </script>
 </body>
 </html>
