@@ -1,54 +1,49 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>KAISSAVA - Referans/Davet</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { background: #181b24; color: #fff; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 520px; margin: 44px auto; background: #1a1c22; padding: 34px 36px; border-radius: 18px; box-shadow: 0 4px 22px #0003;}
-    h1 { text-align: center; margin-bottom: 28px;}
-    .info { margin-bottom: 22px; }
-    .copy-btn { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 5px 17px; cursor: pointer; margin-left: 8px;}
-    .copy-btn:hover { background: #1e40af; }
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 24px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #1e2330; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 450px; margin: 60px auto; background: #171b24; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
+    h1 { text-align: center; margin-bottom: 32px;}
+    .info { margin-bottom: 18px;}
+    .invite { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 1.1em; cursor: pointer;}
+    .invite:hover { background: #1e40af;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
-    .ref-link { background: #333; color: #ff0; padding: 4px 6px; border-radius: 6px; font-size: 1.1em;}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Arkadaşını Davet Et</h1>
-    <div class="info" id="info"></div>
-    <div>
-      <span class="ref-link" id="refCode"></span>
-      <button class="copy-btn" onclick="copyRef()">Kodu Kopyala</button>
-    </div>
-    <div style="margin-top:15px;font-size:0.93em;color:#aaa;">
-      Davet ettiğin her arkadaş için <b>sandık kazancın %5 artar!</b><br>
-      Arkadaşına bu kodu ver ve kayıt olurken “referans kodu” kısmına yazmasını söyle.
-    </div>
-    <button class="back-btn" onclick="window.location.href='index.html'">Ana Ekran</button>
+    <h1>Referans/Davet</h1>
+    <div class="info" id="referInfo">Davet linkin yükleniyor...</div>
+    <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
   </div>
   <script>
-    let userId = localStorage.getItem("kaissava_userid") || null;
-    if (!userId) { window.location.href = "register.html"; }
-    function loadRef() {
-      fetch("/api/user/" + userId)
-        .then(res => res.json())
-        .then(user => {
-          document.getElementById('info').innerHTML =
-            `<b>Davet edilen kişi sayısı:</b> ${user.referrals || 0}<br>
-             <b>Toplam sandık boost:</b> %${user.chestBoost || 0}`;
-          document.getElementById('refCode').innerText = user.id;
-        });
+    // Telegram WebApp user
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    let userId = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      localStorage.setItem("kaissava_userid", userId);
+    } else {
+      userId = localStorage.getItem("kaissava_userid");
     }
-    function copyRef() {
-      let code = document.getElementById('refCode').innerText;
-      navigator.clipboard.writeText(code);
-      alert("Referans kodun panoya kopyalandı!");
+    const botUsername = "KendiBotAdin"; // Kendi bot adını buraya ekle!
+    const inviteLink = `https://t.me/${botUsername}?start=${userId}`;
+    document.getElementById('referInfo').innerHTML = `
+      Arkadaşını davet et, ekstra sandık bonusu kazan!<br>
+      <input type="text" value="${inviteLink}" id="inviteInput" style="width:90%;padding:4px 8px;font-size:1.05em;" readonly>
+      <button class="invite" onclick="copyInvite()">Kopyala</button>
+    `;
+    function copyInvite() {
+      const input = document.getElementById('inviteInput');
+      input.select(); input.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      alert('Davet linkin kopyalandı!');
     }
-    loadRef();
   </script>
 </body>
 </html>
