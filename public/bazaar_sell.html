@@ -38,27 +38,32 @@
       userId = localStorage.getItem("kaissava_userid");
     }
 
+    let marketItems = [];
+    function getItemInfo(itemId) {
+      return marketItems.find(i => i.id === itemId) || {name:itemId, slot:"other", power:0};
+    }
+
     let selectedItem = null;
 
     function loadInventory() {
-      fetch('/api/user/' + userId)
+      fetch('/api/market')
         .then(res => res.json())
-        .then(user => {
-          if (!user.inventory || user.inventory.length === 0) {
-            document.getElementById('inventoryList').innerHTML = '<div>Envanterinde satılacak ekipman yok.</div>';
-            document.getElementById('sellForm').innerHTML = '';
-            return;
-          }
-          // Varsayalım item listesi market.json'daki id ve isimlerle eşleşiyor:
-          fetch('/api/market')
+        .then(items => {
+          marketItems = items;
+          fetch('/api/user/' + userId)
             .then(res => res.json())
-            .then(items => {
+            .then(user => {
+              if (!user.inventory || user.inventory.length === 0) {
+                document.getElementById('inventoryList').innerHTML = '<div>Envanterinde satılacak ekipman yok.</div>';
+                document.getElementById('sellForm').innerHTML = '';
+                return;
+              }
               let html = '';
               user.inventory.forEach(invId => {
-                const item = items.find(i => i.id === invId);
+                const item = getItemInfo(invId);
                 if (item) {
                   html += `<div class="item">
-                    <span class="item-name">${item.name}</span>
+                    <span class="item-name">${item.name} <span style="color:#0f0;">+${item.power || 0} güç</span></span>
                     <button class="sell-btn" onclick="openSell('${item.id}', '${item.name}')">Pazara Ekle</button>
                   </div>`;
                 }
