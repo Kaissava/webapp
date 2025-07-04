@@ -360,6 +360,45 @@ app.post("/api/buy_bazaar", (req, res) => {
   res.json({ message: "Satın alındı ve envantere eklendi." });
 });
 
+// Ekipman giydir
+app.post("/api/equip", (req, res) => {
+  const { userId, itemId } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  let items = JSON.parse(fs.readFileSync(MARKET_FILE, "utf-8"));
+  let item = items.find(i => i.id === itemId);
+  if (!user || !item) return res.status(404).json({ error: "Kullanıcı veya eşya bulunamadı!" });
+  let slot = item.slot || "other";
+  user.equipped = user.equipped || {};
+  user.inventory = user.inventory || [];
+  // O slottaki eski eşyayı envantere iade et
+  if (user.equipped[slot]) {
+    user.inventory.push(user.equipped[slot]);
+  }
+  user.equipped[slot] = itemId;
+  // Envanterden sil
+  user.inventory = user.inventory.filter(i => i !== itemId);
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  res.json({ message: "Giyildi!" });
+});
+// Ekipman çıkar
+app.post("/api/unequip", (req, res) => {
+  const { userId, slot } = req.body;
+  let users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+  let user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı!" });
+  user.equipped = user.equipped || {};
+  user.inventory = user.inventory || [];
+  if (user.equipped[slot]) {
+    user.inventory.push(user.equipped[slot]);
+    user.equipped[slot] = null;
+  }
+  users = users.map(u => (u.id === userId ? user : u));
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  res.json({ message: "Çıkarıldı!" });
+});
+
 // Sunucu başlat
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
