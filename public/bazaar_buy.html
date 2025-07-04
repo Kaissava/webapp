@@ -35,23 +35,32 @@
     } else {
       userId = localStorage.getItem("kaissava_userid");
     }
-
+    let marketItems = [];
+    function getItemInfo(itemId) {
+      return marketItems.find(i => i.id === itemId) || {name:itemId, slot:"other", power:0};
+    }
     function loadBazaar() {
-      fetch('/api/bazaar')
+      fetch('/api/market')
         .then(res => res.json())
         .then(items => {
-          let html = '';
-          if (items.length === 0) {
-            html = '<div>Şu anda pazarda hiç ürün yok.</div>';
-          } else {
-            items.forEach(item => {
-              html += `<div class="item">
-                <span class="item-name">${item.name} - ${item.price} coin <span style="font-size:.95em;color:#fff5;">(${item.sellerName})</span></span>
-                <button class="buy-btn" onclick="buyItem('${item.id}')">Satın Al</button>
-              </div>`;
+          marketItems = items;
+          fetch('/api/bazaar')
+            .then(res => res.json())
+            .then(list => {
+              let html = '';
+              if (!list || list.length === 0) {
+                html = '<div>Şu anda pazarda hiç ürün yok.</div>';
+              } else {
+                list.forEach(item => {
+                  let info = getItemInfo(item.itemId);
+                  html += `<div class="item">
+                    <span class="item-name">${info.name} <span style="color:#0f0;">+${info.power || 0} güç</span> - ${item.price} coin <span style="font-size:.95em;color:#fff5;">(${item.sellerName})</span></span>
+                    <button class="buy-btn" onclick="buyItem('${item.id}')">Satın Al</button>
+                  </div>`;
+                });
+              }
+              document.getElementById('bazaarList').innerHTML = html;
             });
-          }
-          document.getElementById('bazaarList').innerHTML = html;
         });
     }
     function buyItem(itemId) {
