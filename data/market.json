@@ -1,7 +1,7 @@
 [
-  { "id": "sword",   "name": "Kılıç",       "price": 100, "slot": "weapon" },
-  { "id": "shield",  "name": "Kalkan",      "price": 120, "slot": "armor"  },
-  { "id": "helmet",  "name": "Miğfer",      "price": 80,  "slot": "helmet" },
-  { "id": "boots",   "name": "Bot",         "price": 60,  "slot": "boots"  },
-  { "id": "gloves",  "name": "Eldiven",     "price": 40,  "slot": "gloves" }
+  { "id": "sword",   "name": "Kılıç",   "price": 100, "slot": "weapon", "power": 10 },
+  { "id": "shield",  "name": "Kalkan",  "price": 120, "slot": "armor",  "power": 8 },
+  { "id": "helmet",  "name": "Miğfer",  "price": 80,  "slot": "helmet", "power": 6 },
+  { "id": "boots",   "name": "Bot",     "price": 60,  "slot": "boots",  "power": 4 },
+  { "id": "gloves",  "name": "Eldiven", "price": 40,  "slot": "gloves", "power": 2 }
 ]
