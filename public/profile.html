@@ -46,7 +46,7 @@
 
     let marketItems = [];
     function getItemInfo(itemId) {
-      return marketItems.find(i => i.id === itemId) || {name:itemId, slot:"other"};
+      return marketItems.find(i => i.id === itemId) || {name:itemId, slot:"other", power:0};
     }
     function slotLabel(slot) {
       return {
@@ -66,7 +66,7 @@
           document.getElementById('profileInfo').innerHTML =
             `<b>${user.name}</b><br>
             Seviye: ${user.level || 1} | XP: ${user.xp || 0} <br>
-            Güç: ${user.power || 10} | Coin: ${user.coins || 0}`;
+            Güç: <b>${user.totalPower || user.power || 10}</b> <span style="color:#aaa;font-size:.93em;">(Ekipman dahil)</span> | Coin: ${user.coins || 0}`;
 
           // Ekipman slotları
           let eqSlots = ['weapon', 'armor', 'helmet', 'boots', 'gloves'];
@@ -76,7 +76,7 @@
             let item = itemId ? getItemInfo(itemId) : null;
             eqHtml += `<div class="slot">
               <span class="slotname">${slotLabel(slot)}</span><br>
-              ${item ? `<b>${item.name}</b> <button class="btn" onclick="unequip('${slot}')">Çıkar</button>` 
+              ${item ? `<b>${item.name}</b> <span style="color:#0f0;">+${item.power || 0} güç</span> <button class="btn" onclick="unequip('${slot}')">Çıkar</button>` 
                 : `<span class="empty">Boş</span>`}
             </div>`;
           });
@@ -87,7 +87,7 @@
           (user.inventory || []).forEach(itemId => {
             let item = getItemInfo(itemId);
             invHtml += `<div class="item">
-              <span>${item.name} <span style="color:#999;font-size:.96em;">(${slotLabel(item.slot)})</span></span>
+              <span>${item.name} <span style="color:#0f0;">+${item.power || 0} güç</span> <span style="color:#999;font-size:.96em;">(${slotLabel(item.slot)})</span></span>
               <button class="btn" onclick="equip('${item.id}')">Giy</button>
             </div>`;
           });
