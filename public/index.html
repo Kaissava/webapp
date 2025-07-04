@@ -86,6 +86,7 @@
       height: auto;
       box-shadow: 0 0 18px #ffe70070;
       border-radius: 28px;
+      background: #191c24;
     }
     h1 {
       font-size: 3rem;
@@ -137,7 +138,6 @@
 <body>
   <!-- YÜKLEME EKRANI -->
   <div id="loading-screen">
-    <!-- BURAYA OYUN LOGONUZU PNG OLARAK YÜKLEYİN (ör: /public/logo.png) -->
     <img class="logo-img" src="logo_kaissava.png" alt="KAISSAVA Logo" />
     <div class="logo-glow">KAISSAVA</div>
     <div class="loader"></div>
@@ -173,7 +173,7 @@
         mainMenu.style.display = "";
         setTimeout(()=>mainMenu.classList.add("show"),30);
       }, 700);
-    }, 2600); // Yükleme süresi
+    }, 2600);
   </script>
 </body>
 </html>
