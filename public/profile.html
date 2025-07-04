@@ -5,22 +5,36 @@
   <title>KAISSAVA - Profilim</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { background: #1e2530; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
-    .container { max-width: 420px; margin: 60px auto; background: #171b24; padding: 36px; border-radius: 16px; box-shadow: 0 4px 28px #0003;}
-    h1 { text-align: center; margin-bottom: 32px;}
-    .info { margin-bottom: 18px;}
-    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 34px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
+    body { background: #222834; color: #ffd700; font-family: 'Segoe UI', sans-serif;}
+    .container { max-width: 490px; margin: 54px auto; background: #181b24; padding: 34px; border-radius: 17px; box-shadow: 0 4px 24px #0003;}
+    h1 { text-align: center; margin-bottom: 22px;}
+    .profile-info { margin-bottom: 28px;}
+    .eq-list, .inv-list { margin-bottom: 22px;}
+    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;}
+    .eq-title { margin-top: 11px; margin-bottom: 7px; color: #fffd;}
+    .btn { background: #2563eb; color: #fff; border: none; border-radius: 9px; padding: 6px 18px; font-size: 1em; cursor: pointer; margin-left: 7px;}
+    .btn:hover { background: #1e40af;}
+    .back-btn { background: #222; color: #ffcc00; border: none; margin-top: 30px; padding: 10px 30px; border-radius: 10px; cursor: pointer;}
     .back-btn:hover { background: #333; }
+    .slot { width: 110px; display:inline-block; }
+    .slotname { color:#ccc; font-size:.98em; }
+    .empty { color: #999; font-style: italic;}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Profilim</h1>
-    <div class="info" id="profileInfo">Yükleniyor...</div>
+    <div class="profile-info" id="profileInfo"></div>
+
+    <div class="eq-title"><b>Üstündekiler</b> (Ekipman):</div>
+    <div class="eq-list" id="equippedList"></div>
+
+    <div class="eq-title"><b>Envanter</b>:</div>
+    <div class="inv-list" id="inventoryList"></div>
+
     <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
   </div>
   <script>
-    // Telegram WebApp kullanıcı
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     let userId = null;
     if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -29,17 +43,84 @@
     } else {
       userId = localStorage.getItem("kaissava_userid");
     }
-    fetch('/api/user/' + userId)
-      .then(res => res.json())
-      .then(user => {
-        document.getElementById('profileInfo').innerHTML = `
-          <b>${user.name}</b> <br>
-          Seviye: ${user.level}<br>
-          Güç: ${user.power}<br>
-          XP: ${user.xp}<br>
-          Coin: ${user.coins}
-        `;
+
+    let marketItems = [];
+    function getItemInfo(itemId) {
+      return marketItems.find(i => i.id === itemId) || {name:itemId, slot:"other"};
+    }
+    function slotLabel(slot) {
+      return {
+        weapon: "Silah",
+        armor: "Zırh",
+        helmet: "Miğfer",
+        boots: "Bot",
+        gloves: "Eldiven"
+      }[slot] || slot;
+    }
+    function loadProfile() {
+      fetch('/api/market').then(res=>res.json()).then(items=>{
+        marketItems = items;
+        fetch('/api/user/' + userId)
+        .then(res => res.json())
+        .then(user => {
+          document.getElementById('profileInfo').innerHTML =
+            `<b>${user.name}</b><br>
+            Seviye: ${user.level || 1} | XP: ${user.xp || 0} <br>
+            Güç: ${user.power || 10} | Coin: ${user.coins || 0}`;
+
+          // Ekipman slotları
+          let eqSlots = ['weapon', 'armor', 'helmet', 'boots', 'gloves'];
+          let eqHtml = '';
+          eqSlots.forEach(slot => {
+            let itemId = user.equipped && user.equipped[slot];
+            let item = itemId ? getItemInfo(itemId) : null;
+            eqHtml += `<div class="slot">
+              <span class="slotname">${slotLabel(slot)}</span><br>
+              ${item ? `<b>${item.name}</b> <button class="btn" onclick="unequip('${slot}')">Çıkar</button>` 
+                : `<span class="empty">Boş</span>`}
+            </div>`;
+          });
+          document.getElementById('equippedList').innerHTML = eqHtml;
+
+          // Envanter
+          let invHtml = '';
+          (user.inventory || []).forEach(itemId => {
+            let item = getItemInfo(itemId);
+            invHtml += `<div class="item">
+              <span>${item.name} <span style="color:#999;font-size:.96em;">(${slotLabel(item.slot)})</span></span>
+              <button class="btn" onclick="equip('${item.id}')">Giy</button>
+            </div>`;
+          });
+          if (!user.inventory || user.inventory.length === 0) {
+            invHtml = '<div class="empty">Envanterinde hiç ekipman yok.</div>';
+          }
+          document.getElementById('inventoryList').innerHTML = invHtml;
+        });
       });
+    }
+    function equip(itemId) {
+      fetch('/api/equip', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId, itemId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        loadProfile();
+      });
+    }
+    function unequip(slot) {
+      fetch('/api/unequip', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ userId, slot })
+      })
+      .then(res => res.json())
+      .then(data => {
+        loadProfile();
+      });
+    }
+    loadProfile();
   </script>
 </body>
 </html>
