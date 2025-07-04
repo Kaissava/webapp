@@ -56,8 +56,19 @@
       transition: opacity .5s .2s;
       width: 90%;
       max-width: 360px;
+      text-align: center;
     }
     .menu-container.show { opacity: 1; }
+
+    /* Ana menüdeki küçük logo */
+    .small-logo {
+      width: 100px;
+      filter: drop-shadow(0 0 16px #ffeeba77);
+      animation: floatLogoSmall 2.5s infinite alternate;
+      margin: 0 auto 12px;
+      display: block;
+    }
+    @keyframes floatLogoSmall { to { transform: translateY(-6px);} }
 
     .menu {
       background: rgba(0,0,0,0.6);
@@ -103,6 +114,7 @@
     @media(max-width: 400px) {
       .btn { font-size: .9rem; padding: 8px; }
       .menu { gap: 8px; }
+      .small-logo { width: 80px; }
     }
   </style>
 </head>
@@ -116,6 +128,9 @@
 
   <!-- Main Menu -->
   <div class="menu-container" id="menu">
+    <!-- Yükleme sonrası küçük animasyonlu logo -->
+    <img src="logo_kaissava.png" class="small-logo" alt="KAISSAVA">
+
     <div class="menu">
       <button class="btn" onclick="go('profile.html')">👤 Profilim</button>
 
