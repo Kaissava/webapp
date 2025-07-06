@@ -28,6 +28,10 @@ function startPVP() {
     document.getElementById("matchText").innerText = `${data.opponent.name} ile eşleştin!`;
     document.getElementById("arenaLoading").innerText = "Arena yükleniyor...`;
 
+    // PvP verisini localStorage’a kaydet
+localStorage.setItem("kaissava_pvp_data", JSON.stringify(data));
+
+
     setTimeout(() => {
       window.location.href = "arena.html";
     }, 3000);
