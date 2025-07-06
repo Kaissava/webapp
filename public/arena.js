@@ -1,3 +1,12 @@
+// PvP verisini localStorage’tan al
+const pvpData = JSON.parse(localStorage.getItem("kaissava_pvp_data"));
+
+// Oyuncu isimleri ve sınıfları
+const playerName = pvpData.player.name;
+const playerClass = pvpData.player.class;
+const opponentName = pvpData.opponent.name;
+const opponentClass = pvpData.opponent.class;
+
 // Arena görselleri
 const arenas = [
   "stonearena.png",
@@ -10,6 +19,14 @@ const arenas = [
 // Rasgele bir arena seç
 const selectedArena = arenas[Math.floor(Math.random() * arenas.length)];
 document.getElementById("arena-background").src = `/assets/arenas/${selectedArena}`;
+
+// Karakter görsellerini yükle
+document.getElementById("player1").src = `/assets/characters/${playerClass}.png`;
+document.getElementById("player2").src = `/assets/characters/${opponentClass}.png`;
+
+// İsimleri yaz
+document.getElementById("name1").innerText = playerName;
+document.getElementById("name2").innerText = opponentName;
 
 // Başlangıç can değerleri
 let player1HP = 100;
@@ -40,7 +57,7 @@ function showWinner(winner) {
   winnerText.innerHTML = `
     <div class="fade-text">
       ${winner} Kazandı!<br>
-      <span style="font-size: 20px;">+25 XP | +100 Coin</span>
+      <span style="font-size: 20px;">+${pvpData.xp} XP | +${pvpData.coins} Coin</span>
       <br><br>
       <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
     </div>
@@ -51,7 +68,7 @@ function startFight() {
   const interval = setInterval(() => {
     if (player1HP <= 0 || player2HP <= 0) {
       clearInterval(interval);
-      showWinner(player1HP <= 0 ? "Player 2" : "Player 1");
+      showWinner(player1HP <= 0 ? opponentName : playerName);
       return;
     }
 
@@ -60,10 +77,10 @@ function startFight() {
 
     if (attacker === 1) {
       player2HP = Math.max(0, player2HP - damage);
-      showDamage(`Player 1 ${damage} vurdu`);
+      showDamage(`${playerName} ${damage} vurdu`);
     } else {
       player1HP = Math.max(0, player1HP - damage);
-      showDamage(`Player 2 ${damage} vurdu`);
+      showDamage(`${opponentName} ${damage} vurdu`);
     }
 
     updateHealthBars();
