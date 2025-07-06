@@ -30,8 +30,17 @@ function showDamage(text) {
 }
 
 function showWinner(winner) {
-  document.getElementById("winner-text").innerText = `${winner} Kazandı!`;
+  const winnerText = document.getElementById("winner-text");
+  winnerText.innerHTML = `
+    <div class="fade-text">
+      ${winner} Kazandı!<br>
+      <span style="font-size: 20px;">+25 XP | +100 Coin</span>
+      <br><br>
+      <button class="back-btn" onclick="location.href='index.html'">Ana Menü</button>
+    </div>
+  `;
 }
+
 
 function startFight() {
   const interval = setInterval(() => {
