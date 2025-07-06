@@ -1,3 +1,54 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #181b24;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 70px;
+}
+
+.pvp-btn {
+  background: #ffcc00;
+  border: none;
+  padding: 25px 70px;
+  border-radius: 18px;
+  font-size: 1.7em;
+  margin: 16px;
+  transition: .2s;
+  cursor: pointer;
+}
+.pvp-btn:hover {
+  background: #fff200;
+  transform: scale(1.07);
+}
+
+.result {
+  margin-top: 30px;
+  font-size: 1.3em;
+  color: #88ff88;
+}
+
+.back-btn {
+  background: #222;
+  color: #ffcc00;
+  border: none;
+  margin-top: 40px;
+  padding: 10px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1em;
+}
+.back-btn:hover {
+  background: #333;
+}
+
+/* PvP Arena Sahnesi */
+
 #arena-container {
   position: relative;
   width: 100%;
@@ -21,8 +72,13 @@
   width: 150px;
   z-index: 1;
 }
-#player1 { left: 50px; }
-#player2 { right: 50px; transform: scaleX(-1); }
+#player1 {
+  left: 50px;
+}
+#player2 {
+  right: 50px;
+  transform: scaleX(-1);
+}
 
 .healthbar {
   position: absolute;
@@ -33,14 +89,39 @@
   z-index: 2;
   border-radius: 10px;
 }
-#healthbar1 { left: 50px; }
-#healthbar2 { right: 50px; }
+#healthbar1 {
+  left: 50px;
+}
+#healthbar2 {
+  right: 50px;
+}
 
 .bar {
   height: 100%;
   background-color: green;
   width: 100%;
   border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+}
+
+.player-name {
+  position: absolute;
+  top: 45px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 4px #000;
+  z-index: 2;
+}
+#name1 {
+  left: 50px;
+}
+#name2 {
+  right: 50px;
+  text-align: right;
 }
 
 #damage-text {
@@ -64,12 +145,17 @@
   z-index: 3;
 }
 
+/* Yazı efektleri */
 .fade-text {
   animation: fadeIn 1.2s ease-in-out;
 }
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
