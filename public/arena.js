@@ -9,15 +9,21 @@ const arenas = [
 
 // Rasgele bir arena seç
 const selectedArena = arenas[Math.floor(Math.random() * arenas.length)];
-document.getElementById("arena-background").src = `assets/arenas/${selectedArena}`;
+document.getElementById("arena-background").src = `/assets/arenas/${selectedArena}`;
 
 // Başlangıç can değerleri
 let player1HP = 100;
 let player2HP = 100;
 
 function updateHealthBars() {
-  document.getElementById("bar1").style.width = player1HP + "%";
-  document.getElementById("bar2").style.width = player2HP + "%";
+  const bar1 = document.getElementById("bar1");
+  const bar2 = document.getElementById("bar2");
+
+  bar1.style.width = player1HP + "%";
+  bar2.style.width = player2HP + "%";
+
+  bar1.innerText = player1HP;
+  bar2.innerText = player2HP;
 }
 
 function showDamage(text) {
@@ -40,7 +46,6 @@ function showWinner(winner) {
     </div>
   `;
 }
-
 
 function startFight() {
   const interval = setInterval(() => {
