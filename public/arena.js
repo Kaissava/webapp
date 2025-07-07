@@ -6,7 +6,6 @@ window.onload = async () => {
 
   let count = 3;
   const countdown = document.getElementById("countdown");
-  countdown.style.display = "block";
   const countdownInterval = setInterval(() => {
     countdown.innerText = count;
     count--;
@@ -36,14 +35,16 @@ function startBattle() {
     let damage = Math.floor(Math.random() * 20) + 5;
 
     if (turn === 1) {
-      hp2 = Math.max(0, hp2 - damage);
+      hp2 -= damage;
+      if (hp2 < 0) hp2 = 0;
       bar2.style.width = hp2 + "%";
       bar2.innerText = hp2;
-      char1.style.transform = "translateX(50px)";
-      setTimeout(() => { char1.style.transform = "translateX(0)"; }, 300);
+      char1.style.transform = "translateX(50px) scaleX(1)";
+      setTimeout(() => { char1.style.transform = "translateX(0) scaleX(1)"; }, 300);
       damageText.innerText = `Player 1 ${damage} vurdu`;
     } else {
-      hp1 = Math.max(0, hp1 - damage);
+      hp1 -= damage;
+      if (hp1 < 0) hp1 = 0;
       bar1.style.width = hp1 + "%";
       bar1.innerText = hp1;
       char2.style.transform = "translateX(-50px) scaleX(-1)";
@@ -52,7 +53,7 @@ function startBattle() {
     }
 
     damageText.style.opacity = 1;
-    setTimeout(() => { damageText.style.opacity = 0; }, 800);
+    setTimeout(() => { damageText.style.opacity = 0; }, 900);
 
     if (hp1 <= 0 || hp2 <= 0) {
       clearInterval(interval);
