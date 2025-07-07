@@ -32,28 +32,29 @@ function startBattle() {
   let turn = 1;
 
   const interval = setInterval(() => {
-    let damage = Math.floor(Math.random() * 20) + 5;
+    const damage = Math.floor(Math.random() * 20) + 5;
 
     if (turn === 1) {
       hp2 -= damage;
-      if (hp2 < 0) hp2 = 0;
+      hp2 = Math.max(hp2, 0);
       bar2.style.width = hp2 + "%";
       bar2.innerText = hp2;
-      char1.style.transform = "translateX(50px) scaleX(1)";
-      setTimeout(() => { char1.style.transform = "translateX(0) scaleX(1)"; }, 300);
-      damageText.innerText = `Player 1 ${damage} vurdu`;
+      char1.style.transform = "translateX(40px)";
+      setTimeout(() => {
+        char1.style.transform = "translateX(0)";
+      }, 300);
+      showDamage(`Player 1 ${damage} vurdu`);
     } else {
       hp1 -= damage;
-      if (hp1 < 0) hp1 = 0;
+      hp1 = Math.max(hp1, 0);
       bar1.style.width = hp1 + "%";
       bar1.innerText = hp1;
-      char2.style.transform = "translateX(-50px) scaleX(-1)";
-      setTimeout(() => { char2.style.transform = "translateX(0) scaleX(-1)"; }, 300);
-      damageText.innerText = `Player 2 ${damage} vurdu`;
+      char2.style.transform = "translateX(-40px) scaleX(-1)";
+      setTimeout(() => {
+        char2.style.transform = "translateX(0) scaleX(-1)";
+      }, 300);
+      showDamage(`Player 2 ${damage} vurdu`);
     }
-
-    damageText.style.opacity = 1;
-    setTimeout(() => { damageText.style.opacity = 0; }, 900);
 
     if (hp1 <= 0 || hp2 <= 0) {
       clearInterval(interval);
@@ -67,4 +68,13 @@ function startBattle() {
 
     turn = turn === 1 ? 2 : 1;
   }, 1500);
+}
+
+function showDamage(text) {
+  const damageText = document.getElementById("damage-text");
+  damageText.innerText = text;
+  damageText.style.opacity = 1;
+  setTimeout(() => {
+    damageText.style.opacity = 0;
+  }, 1000);
 }
