@@ -8,28 +8,21 @@
 <body>
   <div id="arena-container">
     <img id="arena-background" src="assets/arenas/stonearena.png" alt="Arena">
+    <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Player 1">
+    <img id="char2" class="character" src="assets/characters/assassin.png" alt="Player 2">
 
-    <!-- Karakter görselleri -->
-    <img id="char1" class="character left-character" src="assets/characters/gladiator.png" alt="Player 1">
-    <img id="char2" class="character right-character" src="assets/characters/assassin.png" alt="Player 2">
-
-    <!-- Can barları -->
     <div id="health1" class="health-bar"><div id="bar1">100</div></div>
     <div id="health2" class="health-bar"><div id="bar2">100</div></div>
 
-    <!-- Oyuncu isimleri -->
     <div id="name1" class="player-name">Player 1</div>
     <div id="name2" class="player-name">Player 2</div>
 
-    <!-- Hasar metni -->
     <div id="damage-text"></div>
+    <div id="winner-text"></div>
+    <div id="reward-text"></div>
+    <button id="exit-btn">Ana Menü</button>
   </div>
 
-  <!-- Kazanan ve ödül -->
-  <div id="winner-text"></div>
-  <div id="reward-text"></div>
-
-  <!-- JavaScript -->
   <script src="arena.js"></script>
 </body>
 </html>
