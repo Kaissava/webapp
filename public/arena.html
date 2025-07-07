@@ -2,29 +2,39 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>KAISSAVA - PvP Arena</title>
+  <title>Kaissava - Arena Modu</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="arena-container">
-    <img id="arena-background" class="arena-bg" src="" alt="Arena Background">
-    <div class="health-bar" id="health1">
-      <div class="bar" id="bar1"></div>
-      <span class="player-name" id="name1">Player 1</span>
-    </div>
-    <img id="char1" class="character left" src="assets/characters/gladiator.png">
+  <div id="arena-container">
+    <img id="arena-background" src="assets/arenas/lavaarena.png" alt="Arena">
     
-    <div class="health-bar" id="health2">
-      <div class="bar" id="bar2"></div>
-      <span class="player-name" id="name2">Player 2</span>
-    </div>
-    <img id="char2" class="character right" src="assets/characters/assassin.png">
+    <!-- Team 1 -->
+    <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Oyuncu 1">
+    <img id="char2" class="character" src="assets/characters/mystic.png" alt="Oyuncu 2">
+    
+    <!-- Team 2 -->
+    <img id="char3" class="character flipped" src="assets/characters/assassin.png" alt="Rakip 1">
+    <img id="char4" class="character flipped" src="assets/characters/gladiator.png" alt="Rakip 2">
 
+    <!-- Health bars -->
+    <div id="health1" class="health-bar"><div id="bar1">100</div></div>
+    <div id="health2" class="health-bar"><div id="bar2">100</div></div>
+    <div id="health3" class="health-bar"><div id="bar3">100</div></div>
+    <div id="health4" class="health-bar"><div id="bar4">100</div></div>
+
+    <!-- Names -->
+    <div id="name1" class="player-name">Oyuncu 1</div>
+    <div id="name2" class="player-name">Oyuncu 2</div>
+    <div id="name3" class="player-name">Rakip 1</div>
+    <div id="name4" class="player-name">Rakip 2</div>
+
+    <!-- Damage -->
     <div id="damage-text"></div>
-    <div id="winner-text"></div>
-    <button onclick="window.location.href='index.html'" class="back-btn">Ana Menü</button>
   </div>
+
+  <div id="winner-text"></div>
+  <div id="reward-text"></div>
 
   <script src="arena.js"></script>
 </body>
