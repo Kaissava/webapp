@@ -1,39 +1,61 @@
-const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-let userId = null;
+const arenas = [
+  "stonearena.png",
+  "airarena.png",
+  "junglearena.png",
+  "coldarena.png",
+  "lavaarena.png"
+];
+const selectedArena = arenas[Math.floor(Math.random() * arenas.length)];
+document.getElementById("arena-background").src = `assets/arenas/${selectedArena}`;
 
-if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-  userId = tg.initDataUnsafe.user.id.toString();
-  localStorage.setItem("kaissava_userid", userId);
-} else {
-  userId = localStorage.getItem("kaissava_userid");
+// Vuruş sırası simülasyonu
+let player1HP = 100;
+let player2HP = 100;
+
+function updateBars() {
+  document.getElementById("bar1").style.width = player1HP + "%";
+  document.getElementById("bar2").style.width = player2HP + "%";
+  document.getElementById("bar1").innerText = player1HP;
+  document.getElementById("bar2").innerText = player2HP;
 }
 
-function startPVP() {
-  document.querySelector(".pvp-btn").style.display = "none";
-  document.getElementById("matchmaking").style.display = "block";
-  document.getElementById("matchText").innerText = "Rakip bulunuyor...";
+function showDamage(text) {
+  const dmg = document.getElementById("damage-text");
+  dmg.innerText = text;
+  dmg.style.opacity = 1;
+  setTimeout(() => {
+    dmg.style.opacity = 0;
+  }, 1000);
+}
 
-  fetch('/api/pvp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      document.getElementById("matchText").innerText = "Hata: " + data.error;
+function showWinner(winner) {
+  document.getElementById("winner-text").innerText = `${winner} Kazandı!`;
+  document.getElementById("back-btn").style.display = "block";
+}
+
+function startFight() {
+  document.querySelector(".versus-text").style.display = "none";
+  const interval = setInterval(() => {
+    if (player1HP <= 0 || player2HP <= 0) {
+      clearInterval(interval);
+      showWinner(player1HP <= 0 ? "Player 2" : "Player 1");
       return;
     }
 
-    document.getElementById("matchText").innerText = `${data.opponent.name} ile eşleştin!`;
-    document.getElementById("arenaLoading").innerText = "Arena yükleniyor...`;
+    const attacker = Math.random() < 0.5 ? 1 : 2;
+    const damage = Math.floor(Math.random() * 20) + 5;
 
-    // PvP verisi
-localStorage.setItem("kaissava_pvp_data", JSON.stringify(data));
+    if (attacker === 1) {
+      player2HP = Math.max(0, player2HP - damage);
+      showDamage(`Player 1 ${damage} vurdu`);
+    } else {
+      player1HP = Math.max(0, player1HP - damage);
+      showDamage(`Player 2 ${damage} vurdu`);
+    }
 
-
-    setTimeout(() => {
-      window.location.href = "arena.html";
-    }, 3000);
-  });
+    updateBars();
+  }, 1500);
 }
+
+setTimeout(startFight, 3000);
+updateBars();
