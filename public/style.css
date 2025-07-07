@@ -1,10 +1,10 @@
 body {
+  background-color: #181b24;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #181b24;
   overflow: hidden;
-  color: white;
 }
 
 #arena-container {
@@ -18,53 +18,51 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 0;
 }
 
-/* KARAKTERLER */
+/* KARAKTER GÖRSELLERİ */
 .character {
   position: absolute;
-  bottom: 90px;
-  width: 140px;
-  height: auto;
+  bottom: 100px;
+  height: 180px; /* Boyut sabitlendi */
+  width: auto;
   transition: transform 0.3s ease;
-  z-index: 1;
 }
 
 #char1 {
-  left: 15%;
+  left: 12%;
   transform: scaleX(1);
 }
 
 #char2 {
-  right: 15%;
+  right: 12%;
   transform: scaleX(-1);
 }
 
 /* SAĞLIK BARLARI */
 .health-bar {
   position: absolute;
-  width: 220px;
+  width: 30vw;  /* Yüzdelik olarak ayarlandı */
   height: 22px;
   background: #333;
   border: 2px solid #fff;
   border-radius: 6px;
-  z-index: 2;
+  z-index: 5;
 }
 
 #health1 {
-  top: 28px;
-  left: 50px;
+  top: 16px;
+  left: 10px;
 }
 
 #health2 {
-  top: 28px;
-  right: 50px;
+  top: 16px;
+  right: 10px;
 }
 
 #bar1, #bar2 {
   height: 100%;
-  background: red;
+  background: #f00;
   text-align: center;
   line-height: 22px;
   font-weight: bold;
@@ -75,38 +73,36 @@ body {
 /* OYUNCU İSİMLERİ */
 .player-name {
   position: absolute;
-  top: 5px;
-  font-size: 1.1em;
+  top: -8px;
+  font-size: 1em;
   font-weight: bold;
-  z-index: 2;
 }
 
 #name1 {
-  left: 50px;
+  left: 10px;
 }
 
 #name2 {
-  right: 50px;
+  right: 10px;
 }
 
-/* HASAR METNİ */
+/* HASAR GÖSTERGESİ */
 #damage-text {
   position: absolute;
-  top: 45%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 28px;
   color: yellow;
   text-shadow: 2px 2px 5px #000;
   opacity: 0;
-  z-index: 3;
   transition: opacity 0.3s ease;
 }
 
 /* GERİ SAYIM */
 #countdown {
   position: absolute;
-  top: 38%;
+  top: 40%;
   left: 50%;
   transform: translateX(-50%);
   font-size: 64px;
@@ -116,29 +112,31 @@ body {
   z-index: 10;
 }
 
-/* KAZANAN & ÖDÜL METNİ */
-#winner-text, #reward-text {
+/* KAZANAN METNİ */
+#winner-text {
   position: absolute;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
+  font-size: 42px;
+  color: #00ffcc;
   font-weight: bold;
-  z-index: 4;
   display: none;
 }
 
-#winner-text {
-  top: 50%;
-  font-size: 42px;
-  color: #00ffcc;
-}
-
+/* ÖDÜL METNİ */
 #reward-text {
-  bottom: 70px;
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 20px;
   color: #fff;
+  display: none;
 }
 
-/* BUTON */
+/* ÇIKIŞ BUTONU */
+#exit-btn,
 #back-button {
   position: absolute;
   bottom: 20px;
@@ -151,10 +149,10 @@ body {
   border-radius: 8px;
   cursor: pointer;
   display: none;
-  z-index: 5;
+  z-index: 20;
 }
 
-/* YÜKLENİYOR */
+/* YÜKLENİYOR EKRANI */
 #loading-screen {
   position: absolute;
   width: 100%;
