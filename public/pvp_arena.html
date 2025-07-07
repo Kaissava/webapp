@@ -2,34 +2,26 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>KAISSAVA - PvP Savaşı</title>
+  <title>Kaissava - PvP Arenası</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <img id="arena-background" src="" style="position: absolute; top: 0; left: 0; width: 100%; z-index: -1;" />
+  <div id="arena-container">
+    <img id="arena-background" src="assets/arenas/stonearena.png" alt="Arena">
+    <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Player 1">
+    <img id="char2" class="character" src="assets/characters/assassin.png" alt="Player 2">
 
-  <div class="character-wrapper">
-    <div class="character-side">
-      <img id="char1" class="character" src="assets/characters/gladiator.png">
-      <div class="player-name" id="name1">Player 1</div>
-      <div class="health-bar"><div id="bar1" class="bar"></div></div>
-    </div>
+    <div id="health1" class="health-bar"><div id="bar1">100</div></div>
+    <div id="health2" class="health-bar"><div id="bar2">100</div></div>
 
-    <div class="character-side">
-      <img id="char2" class="character flipped" src="assets/characters/assassin.png">
-      <div class="player-name" id="name2">Player 2</div>
-      <div class="health-bar"><div id="bar2" class="bar"></div></div>
-    </div>
+    <div id="name1" class="player-name">Player 1</div>
+    <div id="name2" class="player-name">Player 2</div>
+
+    <div id="damage-text"></div>
   </div>
 
-  <div id="damage-text" style="text-align:center; font-size: 22px; color: #ff6666; margin-top: 40px; opacity: 0; transition: opacity 0.4s;"></div>
-  <div id="winner-text" style="text-align:center; font-size: 24px; color: #00ffcc; margin-top: 20px;"></div>
-  <div id="reward-text" style="text-align:center; font-size: 18px; color: #ffff66; margin-top: 10px;"></div>
-
-  <div style="text-align:center; margin-top: 40px;">
-    <button class="back-btn" onclick="location.href='index.html'">Ana Menüye Dön</button>
-  </div>
+  <div id="winner-text"></div>
+  <div id="reward-text"></div>
 
   <script src="arena.js"></script>
 </body>
