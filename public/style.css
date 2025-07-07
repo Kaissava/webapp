@@ -1,220 +1,130 @@
 body {
-  background: #181b24;
+  background-color: #181b24;
   color: #fff;
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 #arena-container {
   position: relative;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  height: 520px;
-  background-color: #000;
-  border: 3px solid #444;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 18px #000;
+  width: 100vw;
+  height: 100vh;
 }
 
 #arena-background {
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
 }
 
 .character {
   position: absolute;
-  bottom: 60px;
-  width: 160px;
+  bottom: 100px;
+  width: 140px;
   height: auto;
-  z-index: 2;
   transition: transform 0.3s ease;
 }
 
 #char1 {
-  left: 80px;
+  left: 12%;
   transform: scaleX(1);
 }
 
 #char2 {
-  right: 80px;
+  right: 12%;
   transform: scaleX(-1);
 }
 
 .health-bar {
   position: absolute;
-  top: 18px;
-  width: 240px;
-  height: 28px;
-  background: #444;
-  border-radius: 14px;
-  overflow: hidden;
-  font-size: 14px;
-  line-height: 28px;
-  text-align: center;
-  color: #000;
-  font-weight: bold;
-}
-
-#bar1 {
-  background: #66cc33;
-  width: 100%;
-}
-
-#bar2 {
-  background: #cc3333;
-  width: 100%;
+  width: 220px;
+  height: 22px;
+  background: #333;
+  border: 2px solid #fff;
+  border-radius: 6px;
 }
 
 #health1 {
-  left: 40px;
+  top: 28px;
+  left: 50px;
 }
 
 #health2 {
-  right: 40px;
+  top: 28px;
+  right: 50px;
+}
+
+#bar1, #bar2 {
+  height: 100%;
+  background: #f00;
+  text-align: center;
+  line-height: 22px;
+  font-weight: bold;
+  color: white;
+  border-radius: 4px;
 }
 
 .player-name {
   position: absolute;
-  top: 50px;
-  font-size: 16px;
-  color: #ffcc00;
+  top: 5px;
+  font-size: 1.1em;
   font-weight: bold;
 }
 
 #name1 {
-  left: 40px;
+  left: 50px;
 }
 
 #name2 {
-  right: 40px;
+  right: 50px;
 }
 
 #damage-text {
   position: absolute;
-  top: 130px;
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #f99;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: 5;
-}
-
-#winner-text {
-  margin-top: 20px;
-  font-size: 26px;
-  text-align: center;
-  color: #00ff88;
-  font-weight: bold;
-}
-
-#reward-text {
-  margin-top: 6px;
-  font-size: 18px;
-  text-align: center;
-  color: #ffaa00;
-}
-
-.arena-scene {
-  position: relative;
-  width: 100%;
-  max-width: 720px;
-  margin: 30px auto;
-  border: 3px solid #444;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.arena-background {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.character {
-  position: absolute;
-  width: 90px;
-  bottom: 60px;
-  image-rendering: pixelated;
-}
-
-.character.left1 { left: 15%; transform: scaleX(1); }
-.character.left2 { left: 25%; transform: scaleX(1); }
-.character.right1 { right: 25%; transform: scaleX(-1); }
-.character.right2 { right: 15%; transform: scaleX(-1); }
-
-.hp-bar {
-  position: absolute;
-  height: 18px;
-  background: linear-gradient(to right, #00cc00, #66ff66);
-  border-radius: 6px;
-  text-align: center;
-  color: #000;
-  font-weight: bold;
-  font-size: 0.8em;
-  padding-top: 2px;
-}
-
-.hp-left1 { top: 20px; left: 15%; width: 100px; }
-.hp-left2 { top: 20px; left: 25%; width: 100px; }
-.hp-right1 { top: 20px; right: 25%; width: 100px; }
-.hp-right2 { top: 20px; right: 15%; width: 100px; }
-
-.name-label {
-  position: absolute;
-  font-size: 0.8em;
-  color: #fff;
-  text-shadow: 1px 1px 3px #000;
-}
-
-.name-left1 { bottom: 48px; left: 15%; }
-.name-left2 { bottom: 48px; left: 25%; }
-.name-right1 { bottom: 48px; right: 25%; }
-.name-right2 { bottom: 48px; right: 15%; }
-
-#damage-text {
-  position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.4em;
-  color: #ff4444;
-  font-weight: bold;
+  font-size: 28px;
+  color: yellow;
+  text-shadow: 2px 2px 5px #000;
   opacity: 0;
-  transition: opacity 0.5s;
+  transition: opacity 0.3s ease;
 }
 
 #winner-text {
-  text-align: center;
-  font-size: 1.6em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 42px;
+  color: #00ffcc;
   font-weight: bold;
-  color: #ffff66;
-  margin-top: 20px;
+  display: none;
 }
 
 #reward-text {
-  text-align: center;
-  font-size: 1.1em;
-  color: #88ff88;
-  margin-top: 10px;
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  color: #fff;
+  display: none;
 }
 
-.attack {
-  transform: translateX(-10px) scale(1.05);
-  transition: transform 0.2s ease-in-out;
+#exit-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 30px;
+  background: #222;
+  color: #ffcc00;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: none;
 }
-.right-character.attack {
-  transform: translateX(10px) scale(1.05);
-}
-
