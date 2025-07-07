@@ -20,10 +20,10 @@ body {
   object-fit: cover;
 }
 
-/* KARAKTERLER */
+/* KARAKTER GÖRSELLERİ */
 .character {
   position: absolute;
-  bottom: 120px;
+  bottom: 100px;
   width: 140px;
   height: auto;
   transition: transform 0.3s ease;
@@ -36,6 +36,11 @@ body {
 
 #char2 {
   right: 12%;
+  transform: scaleX(-1);
+}
+
+/* Flipped class */
+.flipped {
   transform: scaleX(-1);
 }
 
@@ -134,7 +139,8 @@ body {
   display: none;
 }
 
-/* GERİ DÖN BUTONU */
+/* ÇIKIŞ BUTONU */
+#exit-btn,
 #back-button {
   position: absolute;
   bottom: 20px;
