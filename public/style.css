@@ -210,3 +210,11 @@ body {
   margin-top: 10px;
 }
 
+.attack {
+  transform: translateX(-10px) scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+.right-character.attack {
+  transform: translateX(10px) scale(1.05);
+}
+
