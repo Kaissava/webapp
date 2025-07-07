@@ -3,58 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <title>Kaissava - PvP</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Kaissava PvP Arenası</h1>
-    <button class="pvp-btn" onclick="startPVP()">Rakip Bul & Savaşa Başla</button>
-    <div id="pvpResult" class="result"></div>
-    <button class="back-btn" onclick="location.href='index.html'">Geri Dön</button>
+  <div class="arena-container">
+    <img id="arena-background" class="arena-bg" src="" alt="Arena Arkaplanı">
+
+    <div class="versus-text">Player 1 vs Player 2</div>
+
+    <div class="character-wrapper">
+      <div class="character-side">
+        <img id="char1" class="character" src="assets/characters/gladiator.png">
+        <div class="player-name">Player 1</div>
+        <div class="health-bar"><div id="bar1" class="bar"></div></div>
+      </div>
+
+      <div class="character-side">
+        <img id="char2" class="character flipped" src="assets/characters/assassin.png">
+        <div class="player-name">Player 2</div>
+        <div class="health-bar"><div id="bar2" class="bar"></div></div>
+      </div>
+    </div>
+
+    <div id="damage-text" class="damage-text"></div>
+    <div id="winner-text" class="winner-text"></div>
+    <button id="back-btn" onclick="location.href='index.html'" style="display:none;">Geri Dön</button>
   </div>
 
-  <!-- Eşleşme ekranı -->
-  <div id="matchmaking" style="display:none; text-align: center; margin-top: 50px;">
-    <h2 id="matchText">Rakip bulunuyor...</h2>
-    <p id="arenaLoading" style="font-size: 1.1em; color: #ffcc00; margin-top: 20px;"></p>
-  </div>
-
-  <script>
-    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    let userId = null;
-    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      userId = tg.initDataUnsafe.user.id.toString();
-      localStorage.setItem("kaissava_userid", userId);
-    } else {
-      userId = localStorage.getItem("kaissava_userid");
-    }
-
-    function startPVP() {
-      document.querySelector(".pvp-btn").style.display = "none";
-      document.getElementById("matchmaking").style.display = "block";
-      document.getElementById("matchText").innerText = "Rakip bulunuyor...";
-
-      fetch('/api/pvp', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ userId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if(data.error) {
-          document.getElementById("matchText").innerText = "Hata: " + data.error;
-          return;
-        }
-
-        document.getElementById("matchText").innerText = `${data.opponent.name} ile eşleştin!`;
-        document.getElementById("arenaLoading").innerText = "Arena yükleniyor...";
-
-        setTimeout(() => {
-          window.location.href = "pvp_arena.html";
-        }, 3000);
-      });
-    }
-  </script>
+  <script src="pvp.js"></script>
 </body>
 </html>
