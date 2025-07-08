@@ -1,3 +1,13 @@
+window.addEventListener("DOMContentLoaded", () => {
+  const arenas = ["stonearena.png", "lavaarena.png", "junglearena.png", "coldarena.png", "airarena.png"];
+  const randomArena = arenas[Math.floor(Math.random() * arenas.length)];
+  const arenaBg = document.getElementById("arena-background");
+  if (arenaBg) {
+    arenaBg.src = `assets/arenas/${randomArena}`;
+  }
+});
+
+
 window.onload = async () => {
   const loadingScreen = document.getElementById("loading-screen");
   const arenaContainer = document.getElementById("arena-container");
