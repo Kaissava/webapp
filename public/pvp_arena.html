@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=360, height=640, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Kaissava - PvP Arenası</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    html, body {
+      width: 360px;
+      height: 640px;
+      margin: 0 auto;
+      background: black;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
-
-  <!-- YÜKLENİYOR EKRANI -->
   <div id="loading-screen">Rakip aranıyor...</div>
 
-  <!-- ARENA GÖRÜNTÜSÜ -->
   <div id="arena-container" style="display: none;">
-    <img id="arena-background" src="assets/arenas/stonearena.png" alt="Arena">
+    <img id="arena-background" src="assets/arenas/stonearena.png" alt="Arena" />
 
-    <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Player 1">
-    <img id="char2" class="character flipped" src="assets/characters/assassin.png" alt="Player 2">
+    <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Player 1" />
+    <img id="char2" class="character flipped" src="assets/characters/assassin.png" alt="Player 2" />
 
     <div id="health1" class="health-bar"><div id="bar1">100</div></div>
     <div id="health2" class="health-bar"><div id="bar2">100</div></div>
@@ -27,13 +34,10 @@
     <div id="countdown"></div>
   </div>
 
-  <!-- SAVAŞ SONU METİNLERİ -->
   <div id="winner-text"></div>
   <div id="reward-text"></div>
   <button id="back-button" onclick="window.location.href='index.html'">Ana Menüye Dön</button>
 
-  <!-- JAVASCRIPT -->
   <script src="arena.js"></script>
-
 </body>
 </html>
