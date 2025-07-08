@@ -18,46 +18,49 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 0;
 }
 
 /* KARAKTER GÖRSELLERİ */
 .character {
   position: absolute;
-  bottom: 60px;
-  width: 18vmin;
+  bottom: 100px;
+  width: 12vw; /* responsive boyut */
+  max-width: 150px;
   height: auto;
   transition: transform 0.3s ease;
+  z-index: 1;
 }
 
-.character.left {
-  left: 12%;
+#char1 {
+  left: 15%;
   transform: scaleX(1);
 }
 
-.character.right {
-  right: 12%;
-  transform: scaleX(-1);
+#char2 {
+  right: 15%;
+  transform: scaleX(-1); /* Karşıya baktırır */
 }
 
 /* SAĞLIK BARLARI */
 .health-bar {
   position: absolute;
-  width: 160px;
+  width: 200px;
   height: 20px;
   background: #333;
   border: 2px solid #fff;
   border-radius: 6px;
-  z-index: 5;
+  z-index: 2;
 }
 
 #health1 {
-  top: 18px;
-  left: 30px;
+  top: 20px;
+  left: 40px;
 }
 
 #health2 {
-  top: 18px;
-  right: 30px;
+  top: 20px;
+  right: 40px;
 }
 
 #bar1, #bar2 {
@@ -73,17 +76,18 @@ body {
 /* OYUNCU İSİMLERİ */
 .player-name {
   position: absolute;
-  top: 0;
+  top: 0px;
   font-size: 1em;
   font-weight: bold;
+  z-index: 2;
 }
 
 #name1 {
-  left: 30px;
+  left: 40px;
 }
 
 #name2 {
-  right: 30px;
+  right: 40px;
 }
 
 /* HASAR GÖSTERGESİ */
@@ -92,12 +96,12 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 26px;
+  font-size: 28px;
   color: yellow;
   text-shadow: 2px 2px 5px #000;
   opacity: 0;
+  z-index: 3;
   transition: opacity 0.3s ease;
-  z-index: 10;
 }
 
 /* GERİ SAYIM */
@@ -106,11 +110,11 @@ body {
   top: 40%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 60px;
+  font-size: 64px;
   color: white;
   font-weight: bold;
   text-shadow: 2px 2px 8px #000;
-  z-index: 10;
+  z-index: 3;
 }
 
 /* KAZANAN METNİ */
@@ -119,37 +123,40 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 36px;
+  font-size: 42px;
   color: #00ffcc;
   font-weight: bold;
   display: none;
-  z-index: 10;
+  z-index: 4;
 }
 
 /* ÖDÜL METNİ */
 #reward-text {
   position: absolute;
-  bottom: 80px;
+  bottom: 60px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 18px;
+  font-size: 20px;
   color: #fff;
   display: none;
+  z-index: 4;
 }
 
 /* ÇIKIŞ BUTONU */
+#exit-btn,
 #back-button {
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 25px;
+  padding: 10px 30px;
   background: #222;
   color: #ffcc00;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   display: none;
+  z-index: 4;
 }
 
 /* YÜKLENİYOR EKRANI */
@@ -159,10 +166,10 @@ body {
   height: 100%;
   background-color: black;
   color: white;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99;
+  z-index: 100;
 }
