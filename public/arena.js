@@ -1,13 +1,3 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const arenas = ["stonearena.png", "lavaarena.png", "junglearena.png", "coldarena.png", "airarena.png"];
-  const randomArena = arenas[Math.floor(Math.random() * arenas.length)];
-  const arenaBg = document.getElementById("arena-background");
-  if (arenaBg) {
-    arenaBg.src = `assets/arenas/${randomArena}`;
-  }
-});
-
-
 window.onload = async () => {
   const loadingScreen = document.getElementById("loading-screen");
   const arenaContainer = document.getElementById("arena-container");
@@ -18,6 +8,16 @@ window.onload = async () => {
   loadingScreen.style.display = "none";
   arenaContainer.style.display = "block";
 
+  // ✅ Arena arka planını rastgele ata
+  const arenas = ["stonearena.png", "lavaarena.png", "junglearena.png", "coldarena.png", "airarena.png"];
+  const randomArena = arenas[Math.floor(Math.random() * arenas.length)];
+  const arenaBg = document.getElementById("arena-background");
+  if (arenaBg) {
+    arenaBg.src = `assets/arenas/${randomArena}`;
+    console.log("Seçilen arena:", randomArena); // Test için
+  }
+
+  // Geri sayım başlat
   let count = 3;
   const countdown = document.getElementById("countdown");
   countdown.style.display = "block";
