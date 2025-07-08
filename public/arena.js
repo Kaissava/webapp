@@ -1,20 +1,27 @@
 window.onload = async () => {
-  document.getElementById("loading-screen").style.display = "flex";
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  document.getElementById("loading-screen").style.display = "none";
-  document.getElementById("arena-container").style.display = "block";
+  const loadingScreen = document.getElementById("loading-screen");
+  const arenaContainer = document.getElementById("arena-container");
+  loadingScreen.style.display = "flex";
+
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  loadingScreen.style.display = "none";
+  arenaContainer.style.display = "block";
 
   let count = 3;
   const countdown = document.getElementById("countdown");
   countdown.style.display = "block";
 
   const countdownInterval = setInterval(() => {
-    countdown.innerText = count > 0 ? count : "FIGHT!";
+    countdown.innerText = count;
     count--;
-    if (count < -1) {
+    if (count < 0) {
       clearInterval(countdownInterval);
-      countdown.style.display = "none";
-      startBattle();
+      countdown.innerText = "FIGHT!";
+      setTimeout(() => {
+        countdown.style.display = "none";
+        startBattle();
+      }, 1000);
     }
   }, 1000);
 };
@@ -27,31 +34,36 @@ function startBattle() {
   const char1 = document.getElementById("char1");
   const char2 = document.getElementById("char2");
   const damageText = document.getElementById("damage-text");
+  const winnerText = document.getElementById("winner-text");
+  const rewardText = document.getElementById("reward-text");
+  const backButton = document.getElementById("back-button");
 
   let turn = 1;
 
   const interval = setInterval(() => {
-    let damage = Math.floor(Math.random() * 20) + 5;
-    damageText.style.opacity = 1;
+    const damage = Math.floor(Math.random() * 15) + 5;
 
     if (turn === 1) {
-      hp2 -= damage;
-      if (hp2 < 0) hp2 = 0;
+      hp2 = Math.max(0, hp2 - damage);
       bar2.style.width = hp2 + "%";
       bar2.innerText = hp2;
-      char1.style.transform = "translateX(50px)";
-      setTimeout(() => { char1.style.transform = "translateX(0)"; }, 300);
+      char1.style.transform = "translateX(20px)";
+      setTimeout(() => {
+        char1.style.transform = "translateX(0)";
+      }, 300);
       damageText.innerText = `Player 1 ${damage} vurdu`;
     } else {
-      hp1 -= damage;
-      if (hp1 < 0) hp1 = 0;
+      hp1 = Math.max(0, hp1 - damage);
       bar1.style.width = hp1 + "%";
       bar1.innerText = hp1;
-      char2.style.transform = "translateX(-50px) scaleX(-1)";
-      setTimeout(() => { char2.style.transform = "translateX(0) scaleX(-1)"; }, 300);
+      char2.style.transform = "translateX(-20px) scaleX(-1)";
+      setTimeout(() => {
+        char2.style.transform = "translateX(0) scaleX(-1)";
+      }, 300);
       damageText.innerText = `Player 2 ${damage} vurdu`;
     }
 
+    damageText.style.opacity = 1;
     setTimeout(() => {
       damageText.style.opacity = 0;
     }, 1000);
@@ -59,13 +71,13 @@ function startBattle() {
     if (hp1 <= 0 || hp2 <= 0) {
       clearInterval(interval);
       const winner = hp1 > hp2 ? "Player 1" : "Player 2";
-      document.getElementById("winner-text").innerText = `${winner} kazandı!`;
-      document.getElementById("reward-text").innerText = `Ödül: +10 XP +5 Coin`;
-      document.getElementById("winner-text").style.display = "block";
-      document.getElementById("reward-text").style.display = "block";
-      document.getElementById("back-button").style.display = "block";
+      winnerText.innerText = `${winner} kazandı!`;
+      rewardText.innerText = `Ödül: +10 XP +5 Coin`;
+      winnerText.style.display = "block";
+      rewardText.style.display = "block";
+      backButton.style.display = "block";
     }
 
     turn = turn === 1 ? 2 : 1;
-  }, 1500);
+  }, 1300);
 }
