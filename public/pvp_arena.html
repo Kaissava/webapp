@@ -4,30 +4,31 @@
   <meta charset="UTF-8">
   <title>Kaissava - PvP Arenası</title>
   <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=360, height=640, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 </head>
 <body>
-  <div id="loading-screen">Rakip aranıyor...</div>
+  <div id="game-wrapper">
+    <div id="loading-screen">Rakip aranıyor...</div>
 
-  <div id="arena-container" style="display: none;">
-    <img id="arena-background" src="assets/arenas/stonearena.png" alt="Arena">
+    <div id="arena-container" style="display: none;">
+      <img id="arena-background" src="assets/arenas/stonearena.png" alt="Arena">
 
-    <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Player 1">
-    <img id="char2" class="character" src="assets/characters/assassin.png" alt="Player 2">
+      <img id="char1" class="character" src="assets/characters/gladiator.png" alt="Player 1">
+      <img id="char2" class="character" src="assets/characters/assassin.png" alt="Player 2">
 
-    <div id="health1" class="health-bar"><div id="bar1">100</div></div>
-    <div id="health2" class="health-bar"><div id="bar2">100</div></div>
+      <div id="health1" class="health-bar"><div id="bar1">100</div></div>
+      <div id="health2" class="health-bar"><div id="bar2">100</div></div>
 
-    <div id="name1" class="player-name">Player 1</div>
-    <div id="name2" class="player-name">Player 2</div>
+      <div id="name1" class="player-name">Player 1</div>
+      <div id="name2" class="player-name">Player 2</div>
 
-    <div id="damage-text"></div>
-    <div id="countdown" style="display:none;"></div>
+      <div id="damage-text"></div>
+      <div id="countdown" style="display:none;"></div>
+      <div id="winner-text"></div>
+      <div id="reward-text"></div>
+      <button id="back-button" onclick="window.location.href='index.html'">Ana Menüye Dön</button>
+    </div>
   </div>
-
-  <div id="winner-text"></div>
-  <div id="reward-text"></div>
-  <button id="back-button" style="display:none;" onclick="window.location.href='index.html'">Ana Menüye Dön</button>
 
   <script src="arena.js"></script>
 </body>
