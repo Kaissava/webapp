@@ -1,6 +1,6 @@
 window.onload = async () => {
   document.getElementById("loading-screen").style.display = "flex";
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  await new Promise(resolve => setTimeout(resolve, 2000));
   document.getElementById("loading-screen").style.display = "none";
   document.getElementById("arena-container").style.display = "block";
 
@@ -9,15 +9,12 @@ window.onload = async () => {
   countdown.style.display = "block";
 
   const countdownInterval = setInterval(() => {
-    countdown.innerText = count;
+    countdown.innerText = count > 0 ? count : "FIGHT!";
     count--;
-    if (count < 0) {
+    if (count < -1) {
       clearInterval(countdownInterval);
-      countdown.innerText = "FIGHT!";
-      setTimeout(() => {
-        countdown.style.display = "none";
-        startBattle();
-      }, 1000);
+      countdown.style.display = "none";
+      startBattle();
     }
   }, 1000);
 };
@@ -25,7 +22,6 @@ window.onload = async () => {
 function startBattle() {
   let hp1 = 100;
   let hp2 = 100;
-
   const bar1 = document.getElementById("bar1");
   const bar2 = document.getElementById("bar2");
   const char1 = document.getElementById("char1");
@@ -35,7 +31,7 @@ function startBattle() {
   let turn = 1;
 
   const interval = setInterval(() => {
-    const damage = Math.floor(Math.random() * 15) + 5;
+    let damage = Math.floor(Math.random() * 20) + 5;
     damageText.style.opacity = 1;
 
     if (turn === 1) {
@@ -43,26 +39,22 @@ function startBattle() {
       if (hp2 < 0) hp2 = 0;
       bar2.style.width = hp2 + "%";
       bar2.innerText = hp2;
-      char1.style.transform = "translateX(40px)";
-      setTimeout(() => {
-        char1.style.transform = "translateX(0)";
-      }, 300);
+      char1.style.transform = "translateX(50px)";
+      setTimeout(() => { char1.style.transform = "translateX(0)"; }, 300);
       damageText.innerText = `Player 1 ${damage} vurdu`;
     } else {
       hp1 -= damage;
       if (hp1 < 0) hp1 = 0;
       bar1.style.width = hp1 + "%";
       bar1.innerText = hp1;
-      char2.style.transform = "translateX(-40px) scaleX(-1)";
-      setTimeout(() => {
-        char2.style.transform = "translateX(0) scaleX(-1)";
-      }, 300);
+      char2.style.transform = "translateX(-50px) scaleX(-1)";
+      setTimeout(() => { char2.style.transform = "translateX(0) scaleX(-1)"; }, 300);
       damageText.innerText = `Player 2 ${damage} vurdu`;
     }
 
     setTimeout(() => {
       damageText.style.opacity = 0;
-    }, 800);
+    }, 1000);
 
     if (hp1 <= 0 || hp2 <= 0) {
       clearInterval(interval);
@@ -75,5 +67,5 @@ function startBattle() {
     }
 
     turn = turn === 1 ? 2 : 1;
-  }, 1600);
+  }, 1500);
 }
